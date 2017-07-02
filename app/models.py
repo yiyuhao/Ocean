@@ -1,5 +1,7 @@
 from . import db
+from . import login_manager
 from datetime import datetime
+from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -16,7 +18,7 @@ class Role(db.Model):
         return '<Role {}>'.format(self.role_name)
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = 'users'
 
     user_id = db.Column(db.Integer, primary_key=True)
@@ -43,3 +45,12 @@ class User(db.Model):
 
     def verify_password(self, user_password):
         return check_password_hash(self.user_password_hash, user_password)
+
+    # 重写UserMixin get_id()
+    def get_id(self):
+        return self.user_id
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
