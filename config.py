@@ -6,7 +6,7 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY')
 
     # 邮件配置
-    SQLALCHEMY_COMMIT_TEARDOWN = True
+    SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     MAIL_SERVER = 'smtp.sina.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True

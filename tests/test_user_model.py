@@ -15,6 +15,7 @@ class UserModelTestCase(TestCase):
         db.drop_all()
         self.app_context.pop()
 
+    # 密码
     def test_password_setter(self):
         u = User(user_password='password')
         self.assertTrue(u.user_password_hash is not None)
@@ -39,3 +40,14 @@ class UserModelTestCase(TestCase):
         u2 = User(user_password='password')
         self.assertNotEqual(u1.user_password_hash, u2.user_password_hash)
 
+    # 确认token
+    def test_generate_confirmation_token(self):
+        u = User()
+        token = u.generate_confirmation_token()
+        self.assertIsNotNone(token)
+
+    def test_confirm_token(self):
+        u = User()
+        token = u.generate_confirmation_token()
+        self.assertTrue(u.check_confirmation_token(token))
+        self.assertFalse(u.check_confirmation_token(token={'user_id': 1}))

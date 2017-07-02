@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Ocean - 账号未确认
+{% endblock %}
+
+{% block page_content %}
+    <div class="page-header">
+        <h3>你的账号还未确认</h3>
+        <p>
+            访问Ocean需要你确认你的账号
+            请检查你邮箱{{ current_user.user_email }}的收件夹或垃圾箱
+        </p>
+        <p>
+            <a href="{{ url_for('auth.resend_confirmation') }}">
+                点击再次发送确认邮件
+            </a>
+        </p>
+    </div>
+{% endblock %}

@@ -1,7 +1,9 @@
 from . import db
 from . import login_manager
 from datetime import datetime
+from flask import current_app
 from flask_login import UserMixin
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -35,6 +37,11 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return '<User {}>'.format(self.user_name)
 
+    # 重写UserMixin get_id()
+    def get_id(self):
+        return self.user_id
+
+    # 密码设置
     @property
     def user_password(self):
         raise AttributeError('user_password属性不可被访问')
@@ -46,9 +53,21 @@ class User(UserMixin, db.Model):
     def verify_password(self, user_password):
         return check_password_hash(self.user_password_hash, user_password)
 
-    # 重写UserMixin get_id()
-    def get_id(self):
-        return self.user_id
+    def generate_confirmation_token(self):
+        s = Serializer(current_app.config['SECRET_KEY'], expires_in=3600)
+        return s.dumps({'user_id': self.user_id})
+
+    def check_confirmation_token(self, token):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except:
+            return False
+        if data['user_id'] != self.user_id:
+            return False
+        self.user_confirmed = True
+        db.session.add(self)
+        return True
 
 
 @login_manager.user_loader

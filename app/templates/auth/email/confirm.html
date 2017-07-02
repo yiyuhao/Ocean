@@ -1,0 +1,5 @@
+<p>{{ user.user_name }}：感谢注册Ocean！</p><br />
+
+<p>请点击如下链接，以确认你的账户：</p><br />
+
+<p>{{ url_for('auth.confirm', token=token, _external=True) }}</p><br />
