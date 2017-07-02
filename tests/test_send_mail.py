@@ -1,7 +1,6 @@
 from app import create_app
 from unittest import TestCase
 from app.email import send_email
-from flask import current_app
 
 
 class MailSenderTestCase(TestCase):

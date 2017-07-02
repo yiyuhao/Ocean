@@ -3,11 +3,12 @@ from config import config
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from flask_mail import Mail
-
+from flask_sqlalchemy import SQLAlchemy
 
 bootstrap = Bootstrap()
 moment = Moment()
 mail = Mail()
+db = SQLAlchemy()
 
 
 def create_app(config_name):
@@ -20,6 +21,7 @@ def create_app(config_name):
     bootstrap.init_app(app)
     moment.init_app(app)
     mail.init_app(app)
+    db.init_app(app)
 
     # 注册蓝图
     from .main import main as main_blueprint
