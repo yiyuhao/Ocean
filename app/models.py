@@ -37,6 +37,9 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return '<User {}>'.format(self.user_name)
 
+    def __init__(self, **kwargs):
+        super(User, self).__init__(**kwargs)
+
     # 重写UserMixin get_id()
     def get_id(self):
         return self.user_id
