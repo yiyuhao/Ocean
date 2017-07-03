@@ -4,6 +4,12 @@
     Ocean - 分享你沉浸的世界
 {% endblock %}
 
+{% block head %}
+    {{ super() }}
+    <link rel="shortcut icon" href="{{ url_for('static', filename='ocean_logo_100.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='ocean_logo_100.png') }}" type="image/x-icon">
+{% endblock %}
+
 {% block navbar %}
     <nav class="navbar navbar-default" role="navigation">
          <div class="container">
