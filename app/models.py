@@ -2,9 +2,18 @@ from . import db
 from . import login_manager
 from datetime import datetime
 from flask import current_app
-from flask_login import UserMixin
+from flask_login import UserMixin, AnonymousUserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
+
+
+class Permission:
+    FOLLOW = 0b00000001
+    COMMENT = 0b00000010
+    WRITE_ARTICLES = 0b00000100
+    MANAGE_COMMENTS = 0b00001000
+    SET_MODERATOR = 0b00010000
+    ADMIN = 0b10000000
 
 
 class Role(db.Model):
@@ -18,6 +27,26 @@ class Role(db.Model):
 
     def __repr__(self):
         return '<Role {}>'.format(self.role_name)
+
+
+    @staticmethod
+    def insert_roles():
+        roles = {
+            # role_name : (permission, default)
+            'User': (Permission.FOLLOW |
+                     Permission.COMMENT |
+                     Permission.WRITE_ARTICLES, True),
+            'Moderator': (Permission.FOLLOW |
+                          Permission.COMMENT |
+                          Permission.WRITE_ARTICLES |
+                          Permission.MANAGE_COMMENTS, False),
+            'Administrator': (0b11111111, False)
+        }
+        for r in roles:
+            if not Role.query.filter_by(role_name=r).first():
+                role = Role(role_name=r, role_default=roles[r][1], role_permissions=roles[r][0])
+                db.session.add(role)
+        db.session.commit()
 
 
 class User(UserMixin, db.Model):
@@ -39,6 +68,11 @@ class User(UserMixin, db.Model):
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
+        if self.role is None:
+            if self.user_email == current_app.config['OCEAN_ADMIN']:
+                self.role = Role.query.filter_by(role_name='Administrator').first()
+            if self.role is None:
+                self.role = Role.query.filter_by(role_name='User').first()
 
     # 重写UserMixin get_id()
     def get_id(self):
@@ -71,6 +105,26 @@ class User(UserMixin, db.Model):
         self.user_confirmed = True
         db.session.add(self)
         return True
+
+    # 权限检查
+    def can(self, permissions):
+        return self.role is not None and (self.role.role_permissions & permissions) == permissions
+
+    def is_administrator(self, permissions):
+        return self.can(Permission.ADMIN)
+
+
+# 游客权限
+class AnonymousUser(AnonymousUserMixin):
+    @staticmethod
+    def can(permissions):
+        return False
+
+    @property
+    def is_administrator(self):
+        return False
+
+login_manager.anonymous_user = AnonymousUser
 
 
 @login_manager.user_loader

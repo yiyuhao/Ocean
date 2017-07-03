@@ -1,6 +1,6 @@
 from unittest import TestCase
 from app import create_app, db
-from app.models import User, Role
+from app.models import User, Role, Permission, AnonymousUser
 
 
 class UserModelTestCase(TestCase):
@@ -51,3 +51,37 @@ class UserModelTestCase(TestCase):
         token = u.generate_confirmation_token()
         self.assertTrue(u.check_confirmation_token(token))
         self.assertFalse(u.check_confirmation_token(token={'user_id': 1}))
+
+    # 用户权限
+    def test_user_permissions(self):
+        Role.insert_roles()
+        self.assertNotEqual(len(Role.query.all()), 0)
+        u = User(user_email='example@example.com', user_password='password')
+        self.assertTrue(u.can(Permission.FOLLOW))
+        self.assertTrue(u.can(Permission.WRITE_ARTICLES))
+        self.assertTrue(u.can(Permission.COMMENT))
+        self.assertFalse(u.can(Permission.MANAGE_COMMENTS))
+        self.assertFalse(u.can(Permission.SET_MODERATOR))
+
+    def test_moderator_permissions(self):
+        Role.insert_roles()
+        self.assertNotEqual(len(Role.query.all()), 0)
+        u = User(user_email='example@example.com', user_password='password',
+                 role=Role.query.filter_by(role_name='Moderator').first())
+        self.assertTrue(u.can(Permission.FOLLOW))
+        self.assertTrue(u.can(Permission.WRITE_ARTICLES))
+        self.assertTrue(u.can(Permission.COMMENT))
+        self.assertTrue(u.can(Permission.MANAGE_COMMENTS))
+        self.assertFalse(u.can(Permission.SET_MODERATOR))
+
+    def test_admin_permissions(self):
+        Role.insert_roles()
+        self.assertNotEqual(len(Role.query.all()), 0)
+        u = User(user_email=self.app.config['OCEAN_ADMIN'], user_password='admin')
+        self.assertTrue(u.can(Permission.SET_MODERATOR))
+        self.assertTrue(u.can(Permission.ADMIN))
+
+    def test_anonymous_permissions(self):
+        u = AnonymousUser()
+        self.assertFalse(u.can(Permission.FOLLOW))
+        self.assertFalse(u.is_administrator)
