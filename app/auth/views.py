@@ -17,6 +17,12 @@ def filter_unconfirmed_user():
         return redirect(url_for('auth.unconfirmed'))
 
 
+@auth.before_app_request
+def refresh_user_last_seen():
+    if current_user.is_authenticated:
+        current_user.refresh_last_seen()
+
+
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()

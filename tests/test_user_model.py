@@ -1,6 +1,7 @@
 from unittest import TestCase
 from app import create_app, db
 from app.models import User, Role, Permission, AnonymousUser
+from datetime import datetime
 
 
 class UserModelTestCase(TestCase):
@@ -85,3 +86,17 @@ class UserModelTestCase(TestCase):
         u = AnonymousUser()
         self.assertFalse(u.can(Permission.FOLLOW))
         self.assertFalse(u.is_administrator)
+
+    # 检查用户登录时间刷新
+    def test_refresh_last_seen(self):
+        before_register = datetime.utcnow()
+        u = User(user_email='example@example.com', user_password='password')
+        db.session.add(u)
+        db.session.commit()
+        self.assertTrue(u.user_last_seen is not None)
+        user_register_time = u.user_last_seen
+        # 注册时间晚于服务器时间
+        self.assertGreater(user_register_time, before_register)
+        u.refresh_last_seen()
+        # 刷新用户最近登陆时间
+        self.assertGreater(u.user_last_seen, user_register_time)

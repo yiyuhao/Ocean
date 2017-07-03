@@ -28,7 +28,6 @@ class Role(db.Model):
     def __repr__(self):
         return '<Role {}>'.format(self.role_name)
 
-
     @staticmethod
     def insert_roles():
         roles = {
@@ -73,6 +72,8 @@ class User(UserMixin, db.Model):
                 self.role = Role.query.filter_by(role_name='Administrator').first()
             if self.role is None:
                 self.role = Role.query.filter_by(role_name='User').first()
+        self.user_member_since = datetime.utcnow()
+        self.user_last_seen = datetime.utcnow()
 
     # 重写UserMixin get_id()
     def get_id(self):
@@ -112,6 +113,11 @@ class User(UserMixin, db.Model):
 
     def is_administrator(self, permissions):
         return self.can(Permission.ADMIN)
+
+    # 刷新用户访问
+    def refresh_last_seen(self):
+        self.user_last_seen = datetime.utcnow()
+        db.session.add(self)
 
 
 # 游客权限
