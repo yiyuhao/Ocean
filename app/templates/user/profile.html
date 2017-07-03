@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+    <div class="container-fluid box-shadow page-header-no-bottom">
+        <div class="row-fluid">
+            <div class="col-md-2">
+                <img alt="140x140" src="{{ url_for('static', filename='ocean_logo_1000.png') }}"
+                     class="img-rounded center-block" width="150"/>
+                <br/>
+                <p class="text-center">
+                    {{ user.user_name }}
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-8 user-info-sink">
+            <p class="text-left lead">
+                {% if user.user_location %}
+                    {{ user.user_location }}<br/><br/>
+                {% endif %}
+                {% if user.user_about_me %}
+                    {{ user.user_about_me }}
+                {% else %}
+                    这个煞笔什么都没有写~
+                {% endif %}
+            </p>
+        </div>
+        <div class="col-md-2 user-info-sink">
+            <button class="btn btn-block btn-info" type="button">编辑个人资料</button>
+        </div>
+    </div>
+{% endblock %}

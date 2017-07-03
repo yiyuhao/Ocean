@@ -8,6 +8,7 @@
     {{ super() }}
     <link rel="shortcut icon" href="{{ url_for('static', filename='ocean_logo_100.png') }}" type="image/x-icon">
     <link rel="icon" href="{{ url_for('static', filename='ocean_logo_100.png') }}" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 {% endblock %}
 
 {% block navbar %}
@@ -37,7 +38,7 @@
                                 {{ current_user.user_name }}<span class="caret"></span>
                             </a>
                             <ul class="dropdown-menu">
-{#                                <li><a href="{{ url_for('main.profile', username=current_user.user_name) }}">个人主页</a></li>#}
+                                <li><a href="{{ url_for('main.profile', user_name=current_user.user_name) }}">个人主页</a></li>
                                 <li><a href="#">账号</a></li>
                                 <li><a href="#">我的收藏</a></li>
                                 <li><a href="{{ url_for('auth.logout') }}">退出</a></li>
