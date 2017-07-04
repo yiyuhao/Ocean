@@ -4,9 +4,9 @@
     <div class="container-fluid box-shadow page-header-no-bottom">
         <div class="row-fluid">
             <div class="col-md-2">
-                <div class="img-mask">
+                <div class="img-mask center-block">
                     <figure class="effect-avatar">
-                        <img src="{{ url_for('static', filename='ocean_logo_100.png') }}"
+                        <img src="{{ user_avatar_url }}"
                              class="img-rounded center-block" width="140" alt="ddd"/>
                         <figcaption>
                             <p>修改头像</p>
@@ -38,7 +38,7 @@
             </p>
         </div>
         <div class="col-md-2 user-info-sink">
-            <button class="btn btn-block btn-info" type="button">编辑个人资料</button>
+            <button class="btn btn-block btn-default" type="button">编辑个人资料</button>
         </div>
     </div>
 {% endblock %}

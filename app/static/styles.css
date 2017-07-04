@@ -9,7 +9,7 @@
 }
 
 .page-header-no-bottom {
-    padding-top: 9px;
+    padding-top: 20px;
     padding-bottom: 9px;
     margin: 40px 0 20px;
 }
@@ -25,7 +25,7 @@
 }
 
 .img-mask:hover {
-    background-color: rgba(75,75,75,0.51);
+    background-color: rgba(120,120,120,0.4);
     -webkit-transform: scale3d(1, 1, 1);
     transform: scale3d(1, 1, 1);
 }
@@ -38,7 +38,7 @@ figure.effect-avatar img {
 }
 
 figure.effect-avatar:hover img {
-    opacity: 0.2;
+    opacity: 0.3;
     color: rgba(0, 0, 0, 0.58);
     -webkit-transform: scale3d(1, 1, 1);
     transform: scale3d(1, 1, 1);

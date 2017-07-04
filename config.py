@@ -1,5 +1,5 @@
 import os
-from flask_uploads import UploadSet, IMAGES, ALL
+
 
 class Config:
     # 私钥
@@ -19,6 +19,12 @@ class Config:
     # 头像上传配置
     UPLOADED_PHOTOS_ALLOW = tuple('jpg jpe jpeg png gif svg bmp'.split())
     UPLOADED_PHOTOS_DEST = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'app', 'static', 'avatar')
+
+    # 相对路径配置
+    STATIC_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'app', 'static')
+    USER_AVATAR_PATH = os.path.join(STATIC_PATH, 'avatar')
+    USER_AVATAR_SUBPATH = 'avatar'
+    USER_DEFAULT_AVATAR = 'user_default_avatar.png'
 
 
 class DevelopmentConfig(Config):
