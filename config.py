@@ -1,5 +1,5 @@
 import os
-
+from flask_uploads import UploadSet, IMAGES, ALL
 
 class Config:
     # 私钥
@@ -15,6 +15,10 @@ class Config:
     MAIL_SUBJECT_PREFIX = 'Ocean'
     MAIL_SENDER = os.getenv('MAIL_SENDER')
     OCEAN_ADMIN = os.getenv('OCEAN_ADMIN')
+
+    # 头像上传配置
+    UPLOADED_PHOTOS_ALLOW = tuple('jpg jpe jpeg png gif svg bmp'.split())
+    UPLOADED_PHOTOS_DEST = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'app', 'static', 'avatar')
 
 
 class DevelopmentConfig(Config):

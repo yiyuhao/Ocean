@@ -5,6 +5,8 @@ from flask_login import LoginManager
 from flask_moment import Moment
 from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
+from flask_uploads import UploadSet, configure_uploads, IMAGES
+
 
 bootstrap = Bootstrap()
 moment = Moment()
@@ -13,6 +15,7 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
 login_manager.login_view = 'auth.login'
+photo_upload = UploadSet('PHOTOS', IMAGES)
 
 
 def create_app(config_name):
@@ -27,6 +30,8 @@ def create_app(config_name):
     mail.init_app(app)
     db.init_app(app)
     login_manager.init_app(app)
+    # 将config注册到UploadSet实例photos
+    configure_uploads(app, photo_upload)
 
     # 注册蓝图
     from .main import main as main_blueprint
