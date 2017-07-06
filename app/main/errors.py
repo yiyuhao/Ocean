@@ -2,6 +2,11 @@ from . import main
 from flask import render_template
 
 
+@main.app_errorhandler(403)
+def permiss_forbiden():
+    return render_template('erros/403.html'), 403
+
+
 @main.app_errorhandler(404)
 def page_not_find(e):
     return render_template('errors/404.html'), 404
