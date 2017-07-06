@@ -18,9 +18,15 @@ def profile(user_name):
         abort(404)
     # 头像上传
     if request.method == 'POST' and 'photo' in request.files:
-        user.user_avatar = request.files['photo']
-        db.session.add(user)
-        db.session.commit()
+        # 文件类型过滤
+        file = request.files['photo']
+        suffix = file.filename.split('.')[-1]
+        if suffix not in current_app.config['UPLOADED_PHOTOS_ALLOW']:
+            flash('你在干什么 只能上传图片啊！')
+        else:
+            user.user_avatar = file
+            db.session.add(user)
+            db.session.commit()
     user_avatar_uri = url_for('static',
                               filename="{subpath}/{filename}".format(subpath=current_app.config['USER_AVATAR_SUBPATH'],
                                                                      filename=user.user_avatar_hash))

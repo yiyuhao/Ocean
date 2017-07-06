@@ -103,11 +103,6 @@ class User(UserMixin, db.Model):
 
     @user_avatar.setter
     def user_avatar(self, user_avatar):
-        # 文件类型过滤
-        suffix = user_avatar.filename.split('.')[-1]
-        if suffix not in current_app.config['UPLOADED_PHOTOS_ALLOW']:
-            flash('你在干什么 只能上传图片啊！')
-            return
         # 创建文件uuid
         filename_hash = hash_filename(user_avatar.filename)
         abs_filename_hash = os.path.join(current_app.config['USER_AVATAR_PATH'], filename_hash)
