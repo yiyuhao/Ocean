@@ -2,17 +2,26 @@
 
 {% block page_content %}
     <div class="container-fluid box-shadow page-header-no-bottom">
-        <div class="row-fluid">
-            <div class="col-md-2">
-                <div class="img-mask center-block">
+
+        <div class="col-md-2">
+            <div class="row-fluid">
+                {% if current_user == user %}
+                    <div class="img-mask center-block">
+                        <figure class="effect-avatar">
+                            <img src="{{ user_avatar_url }}"
+                                 class="img-rounded center-block" width="140" alt="ddd"/>
+                            <figcaption>
+                                <p>修改头像</p>
+                            </figcaption>
+                        </figure>
+                    </div>
+                {% else %}
                     <figure class="effect-avatar">
                         <img src="{{ user_avatar_url }}"
                              class="img-rounded center-block" width="140" alt="ddd"/>
-                        <figcaption>
-                            <p>修改头像</p>
-                        </figcaption>
                     </figure>
-                </div>
+                {% endif %}
+
                 <br/>
                 <form method=POST enctype=multipart/form-data hidden="hidden"
                       action="{{ url_for('main.profile', user_name=user.user_name) }}">
@@ -25,7 +34,8 @@
             </div>
         </div>
 
-        <div class="col-md-8 user-info-sink">
+        <div class="col-md-8">
+            <p>上次登录：{{ moment(user.user_last_seen).fromNow(refresh=True) }}</p>
             <p class="text-left lead">
                 {% if user.user_location %}
                     {{ user.user_location }}<br/><br/>
@@ -37,8 +47,13 @@
                 {% endif %}
             </p>
         </div>
-        <div class="col-md-2 user-info-sink">
-            <button class="btn btn-block btn-default" type="button">编辑个人资料</button>
+
+        <div class="col-md-2">
+            {% if current_user == user %}
+                <a class="btn btn-block btn-default" href='#' type="button">编辑个人资料</a>
+            {% else %}
+                <a class="btn btn-block btn-default" type="button">关注</a>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
@@ -46,13 +61,13 @@
 {% block scripts %}
     {{ super() }}
     <script>
-    $(document).ready(function(){
-        $('#upload-file').change(function () {
-            $(this).closest('form').submit();
-        });
-        $('.img-mask').click(function () {
-            $('#upload-file').trigger('click');
+        $(document).ready(function () {
+            $('#upload-file').change(function () {
+                $(this).closest('form').submit();
+            });
+            $('.img-mask').click(function () {
+                $('#upload-file').trigger('click');
+            })
         })
-    })
     </script>
 {% endblock %}
