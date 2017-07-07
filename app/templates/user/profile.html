@@ -35,11 +35,13 @@
         </div>
 
         <div class="col-md-8">
-            <p>上次登录：{{ moment(user.user_last_seen).fromNow(refresh=True) }}</p>
-            <p class="text-left lead">
+            <p>
                 {% if user.user_location %}
-                    {{ user.user_location }}<br/><br/>
+                    {{ user.user_location }}&nbsp;&nbsp;
                 {% endif %}
+                上次登录：{{ moment(user.user_last_seen).fromNow(refresh=True) }}
+            </p>
+            <p class="text-left lead">
                 {% if user.user_about_me %}
                     {{ user.user_about_me }}
                 {% else %}
@@ -49,9 +51,16 @@
         </div>
 
         <div class="col-md-2">
-            {% if current_user == user %}
-                <a class="btn btn-block btn-default" href='#' type="button">编辑个人资料</a>
-            {% else %}
+            {% if current_user.is_administrator %}
+                <a class="btn btn-block btn-danger" href='{{ url_for('main.edit_profile_admin', uid=user.user_id) }}'>
+                    编辑资料[Admin]
+                </a>
+            {% elif current_user == user %}
+                <a class="btn btn-block btn-default" href='{{ url_for('main.edit_profile') }}'>
+                    编辑个人资料
+                </a>
+            {% endif %}
+            {% if current_user != user %}
                 <a class="btn btn-block btn-default" type="button">关注</a>
             {% endif %}
         </div>

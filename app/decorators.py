@@ -10,7 +10,7 @@ def permission_required(permissions):
         def check_permissions(*args, **kwargs):
             if not current_user.can(permissions):
                 abort(403)
-            return f
+            return f(*args, **kwargs)
         return check_permissions
     return wrapper
 

@@ -1,9 +1,11 @@
 from . import main
-from .. import photo_upload
+from .forms import EditProfileForm, EditProfileAdminForm
+from ..models import User, Role
 from app import db
-from flask import render_template, abort, request, redirect, url_for, flash, current_app
+from app.decorators import admin_required
 from datetime import datetime
-from ..models import User
+from flask import render_template, abort, request, redirect, url_for, flash, current_app
+from flask_login import current_user, login_required
 
 
 @main.route('/')
@@ -33,9 +35,41 @@ def profile(user_name):
     return render_template('user/profile.html', user=user, user_avatar_url=user_avatar_uri)
 
 
-@main.route('/photo/<name>')
-def show(name):
-    if name is None:
-        abort(404)
-    url = photo_upload.url(name)
-    return render_template('show.html', url=url, name=name)
+@main.route('/edit-profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    form = EditProfileForm()
+    if form.validate_on_submit():
+        current_user.user_about_me = form.user_about_me.data
+        current_user.user_location = form.user_location.data
+        db.session.add(current_user)
+        return redirect(url_for('main.profile', user_name=current_user.user_name))
+    form.user_about_me.data = current_user.user_about_me
+    form.user_location.data = current_user.user_location
+    return render_template('user/edit_profile.html', form=form)
+
+
+@main.route('/edit-profile-admin/<int:uid>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_profile_admin(uid):
+    user = User.query.get_or_404(uid)
+    form = EditProfileAdminForm(user=user)
+    if form.validate_on_submit():
+        user.user_name = form.user_name.data
+        user.user_email = form.user_email.data
+        user.user_confirmed = form.user_confirmed.data
+        user.role = Role.query.get(form.role_id.data)
+        user.user_about_me = form.user_about_me.data
+        user.user_location = form.user_location.data
+        db.session.add(user)
+        db.session.commit()
+        return redirect(url_for('main.profile', user_name=user.user_name))
+    form.user_email.data = user.user_email
+    form.user_name.data = user.user_name
+    form.user_confirmed.data = user.user_confirmed
+    form.role_id.data = user.role_id
+    form.user_name.data = user.user_name
+    form.user_about_me.data = user.user_about_me
+    form.user_location.data = user.user_location
+    return render_template('user/edit_profile_admin.html', form=form, user=user)

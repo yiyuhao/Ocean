@@ -113,11 +113,11 @@ class User(UserMixin, db.Model):
         # 保存原图
         photo_upload.save(user_avatar, name=filename_hash)
         # 生成缩略图
-        avatar_140_140 = rsize(abs_filename_hash, 140, 140)
+        avatar_thumbnail = rsize(abs_filename_hash, 300, 300)
         # 删除原图
         os.remove(abs_filename_hash)
         # 保存缩略图
-        avatar_140_140.save(abs_filename_hash)
+        avatar_thumbnail.save(abs_filename_hash)
         # 保存文件
         self.user_avatar_hash = filename_hash
 
@@ -142,7 +142,8 @@ class User(UserMixin, db.Model):
     def can(self, permissions):
         return self.role is not None and (self.role.role_permissions & permissions) == permissions
 
-    def is_administrator(self, permissions):
+    @property
+    def is_administrator(self):
         return self.can(Permission.ADMIN)
 
     # 刷新用户访问
