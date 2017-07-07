@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField
-from wtforms.validators import DataRequired, Length, Email, Regexp
+from wtforms.validators import DataRequired, Length, Email, Regexp, EqualTo
 from wtforms import ValidationError
 from ..models import User
 
@@ -28,3 +28,33 @@ class RegistrationForm(FlaskForm):
     def validate_user_name(self, field):
         if User.query.filter_by(user_name=field.data).first():
             raise ValidationError('昵称已存在~ 换一个吧')
+
+
+class ChangeEmailForm(FlaskForm):
+    new_user_email = StringField('新邮箱', validators=[Length(1, 64), DataRequired(), Email()])
+    submit_email = SubmitField('保存')
+
+    def validate_new_user_email(self, field):
+        if User.query.filter_by(user_email=field.data).first():
+            raise ValidationError('邮箱已存在')
+
+
+class ChangePasswordForm(FlaskForm):
+    old_password = PasswordField('旧密码', validators=[DataRequired(), Length(4, 64)])
+    new_password = PasswordField('新密码', validators=[DataRequired(), Length(4, 64)])
+    new_password_repeat = PasswordField('再次确认新密码', validators=[DataRequired(),
+                                                               Length(4, 64),
+                                                               EqualTo('new_password', '两次输入必须一致')])
+    submit_password = SubmitField('保存')
+
+    def __init__(self, user, *args, **kwargs):
+        super(ChangePasswordForm, self).__init__(*args, **kwargs)
+        self.user = user
+
+    def validate_old_password(self, field):
+        if not self.user.verify_password(field.data):
+            raise ValidationError('密码错误')
+
+    def validate_new_password(self, field):
+        if self.user.verify_password(field.data):
+            raise ValidationError('新密码与旧密码相同')

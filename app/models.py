@@ -121,9 +121,9 @@ class User(UserMixin, db.Model):
         # 保存文件
         self.user_avatar_hash = filename_hash
 
-    # 确认token
-    def generate_confirmation_token(self):
-        s = Serializer(current_app.config['SECRET_KEY'], expires_in=3600)
+    # 注册确认token
+    def generate_confirmation_token(self, expiration=3600):
+        s = Serializer(current_app.config['SECRET_KEY'], expires_in=expiration)
         return s.dumps({'user_id': self.user_id})
 
     def check_confirmation_token(self, token):
@@ -135,6 +135,23 @@ class User(UserMixin, db.Model):
         if data['user_id'] != self.user_id:
             return False
         self.user_confirmed = True
+        db.session.add(self)
+        return True
+
+    # 更改邮箱token
+    def generate_email_change_token(self, new_user_email, expiration=3600):
+        s = Serializer(current_app.config['SECRET_KEY'], expires_in=expiration)
+        return s.dumps({'user_id': self.user_id, 'new_user_email': new_user_email})
+
+    def change_user_email(self, token):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except:
+            return False
+        if data['user_id'] != self.user_id:
+            return False
+        self.user_email = data['new_user_email']
         db.session.add(self)
         return True
 

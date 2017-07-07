@@ -1,0 +1,5 @@
+{{ user.user_name }}：你已经申请了更换邮箱为 {{ new_user_email }}
+
+请点击如下链接，以确认你的账户：
+
+{{ url_for('auth.change_email', token=token, _external=True) }}

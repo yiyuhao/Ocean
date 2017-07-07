@@ -1,7 +1,7 @@
 from flask import render_template, url_for, flash, redirect, request
 from flask_login import login_user, logout_user, login_required, current_user
 from ..models import User
-from .forms import RegistrationForm, LoginForm
+from .forms import RegistrationForm, LoginForm, ChangeEmailForm, ChangePasswordForm
 from . import auth
 from app import db
 from app.email import send_email
@@ -72,7 +72,7 @@ def confirm(token):
     elif current_user.check_confirmation_token(token):
         flash('你已完成邮箱确认，谢谢')
     else:
-        flash('确认链接无效，或者过期了')
+        flash('该确认邮件的链接无效，或者过期了')
     return redirect(url_for('main.index'))
 
 
@@ -83,10 +83,53 @@ def unconfirmed():
     return render_template('auth/unconfirmed.html')
 
 
-@auth.route('/resend_confirmation')
+@auth.route('/resend_confirmation', methods=['GET', 'POST'])
 @login_required
 def resend_confirmation():
     token = current_user.generate_confirmation_token()
     send_email(to=current_user.user_email, subject='确认你的账号', template='auth/email/confirm', user=current_user, token=token)
     flash('新的一封确认邮件已发往<{user_email}>，请前往邮箱确认。'.format(user_email=current_user.user_email))
+    return redirect(url_for('main.index'))
+
+
+@auth.route('/account', methods=['GET', 'POST'])
+@login_required
+def account():
+    email_form = ChangeEmailForm()
+    password_form = ChangePasswordForm(current_user)
+    # 防止表单未通过验证 刷新了页面 导致遮盖验证错误提示 传入aria_expanded属性
+    form_validate_status = {}
+    if email_form.submit_email.data and email_form.is_submitted():
+        form_validate_status['email_aria_expanded'] = True
+        if email_form.validate():
+            # 发送确认邮件
+            token = current_user.generate_email_change_token(new_user_email=email_form.new_user_email.data)
+            send_email(to=current_user.user_email, subject='确认你的账号', template='auth/email/reconfirm',
+                       user=current_user, token=token, new_user_email=email_form.new_user_email.data)
+            flash('一封确认邮件已发往<{user_email}>，请前往邮箱进行下一步操作。'.format(user_email=current_user.user_email))
+    if password_form.submit_password.data and password_form.is_submitted():
+        form_validate_status['password_aria_expanded'] = True
+        if password_form.validate():
+            current_user.user_password = password_form.new_password.data
+            db.session.add(current_user)
+            flash('密码已更改，请重新登录')
+            logout_user()
+            return redirect(url_for('main.index'))
+
+    return render_template('user/account.html',
+                           user=current_user,
+                           email_aria_expanded=form_validate_status.get('email_aria_expanded', False),
+                           password_aria_expanded=form_validate_status.get('password_aria_expanded', False),
+                           email_form=email_form,
+                           password_form=password_form)
+
+
+# 重置email
+@auth.route('/change-email/<token>', methods=['GET', 'POST'])
+@login_required
+def change_email(token):
+    if current_user.change_user_email(token):
+        flash('你的Ocean登录邮箱已更改')
+    else:
+        flash('该确认邮件的链接无效，或者过期了')
     return redirect(url_for('main.index'))

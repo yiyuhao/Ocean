@@ -24,7 +24,7 @@
 }
 
 .img-mask:hover {
-    background-color: rgba(120,120,120,0.4);
+    background-color: rgba(120, 120, 120, 0.4);
     -webkit-transform: scale3d(1, 1, 1);
     transform: scale3d(1, 1, 1);
 }
@@ -45,16 +45,16 @@
 
 .effect-avatar p {
     position: absolute;
-	right: 0;
-	bottom: 0;
-	margin: 1em;
-	padding: 1em;
-	max-width: 140px;
+    right: 0;
+    bottom: 0;
+    margin: 1em;
+    padding: 1em;
+    max-width: 140px;
     color: #ffffff;
-	text-align: center;
-	opacity: 0;
-	-webkit-transition: opacity 0.35s;
-	transition: opacity 0.35s;
+    text-align: center;
+    opacity: 0;
+    -webkit-transition: opacity 0.35s;
+    transition: opacity 0.35s;
 }
 
 .effect-avatar:hover p {
@@ -63,9 +63,15 @@
     transition-delay: 0.1s;
 }
 
-
-.position-abs-bottom{
+.position-abs-bottom {
     position: absolute;
     top: 0;
     right: 0;
+}
+
+.account-line{
+    padding-bottom: 20px;
+    margin: 30px 0;
+    border-bottom: 1px solid #eee;
+    overflow: hidden;
 }
