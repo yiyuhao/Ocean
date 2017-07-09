@@ -29,13 +29,15 @@
              <div class="navbar-collapse collapse navbar-right">
                  <ul class="nav navbar-nav">
                      <li><a href="/">首页</a></li>
-                     <li><a href="">资料</a></li>
 
                      {% if current_user.is_authenticated %}
                          <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                            <a href="#" class="dropdown-toggle" style="padding: 10px" data-toggle="dropdown" role="button"
                                aria-haspopup="true" aria-expanded="false">
-                                {{ current_user.user_name }}<span class="caret"></span>
+                                <img src="{{ url_for('static', filename="{subpath}/{filename}".format(subpath=current_app.config['USER_AVATAR_SUBPATH'],
+                                                                                                      filename=current_user.user_avatar_hash)) }}"
+                                     width="30" alt="{{ current_user.user_name }}" class="img-circle">
+                                <span class="caret"></span>
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a href="{{ url_for('main.profile', user_name=current_user.user_name) }}">个人主页</a></li>
