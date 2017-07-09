@@ -61,10 +61,11 @@ class User(UserMixin, db.Model):
     user_confirmed = db.Column(db.Boolean, default=False)
     user_location = db.Column(db.String(64))
     user_about_me = db.Column(db.String(64))
-    user_member_since = db.Column(db.DateTime(), default=datetime.utcnow())
-    user_last_seen = db.Column(db.DateTime(), default=datetime.utcnow())
+    user_member_since = db.Column(db.DateTime(), default=datetime.utcnow)
+    user_last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
     user_avatar_hash = db.Column(db.String(128))
     role_id = db.Column(db.Integer, db.ForeignKey('roles.role_id'))
+    posts = db.relationship('Post', backref='user', lazy='dynamic')
 
     def __repr__(self):
         return '<User {}>'.format(self.user_name)
@@ -76,8 +77,6 @@ class User(UserMixin, db.Model):
                 self.role = Role.query.filter_by(role_name='Administrator').first()
             if self.role is None:
                 self.role = Role.query.filter_by(role_name='User').first()
-        self.user_member_since = datetime.utcnow()
-        self.user_last_seen = datetime.utcnow()
         self.user_avatar_hash = current_app.config['USER_DEFAULT_AVATAR']
 
     # 重写UserMixin get_id()
@@ -118,8 +117,9 @@ class User(UserMixin, db.Model):
         os.remove(abs_filename_hash)
         # 保存缩略图
         avatar_thumbnail.save(abs_filename_hash)
-        # 保存文件
+        # 保存图片hash
         self.user_avatar_hash = filename_hash
+        db.session.add(self)
 
     # 注册确认token
     def generate_confirmation_token(self, expiration=3600):
@@ -179,9 +179,28 @@ class AnonymousUser(AnonymousUserMixin):
     def is_administrator(self):
         return False
 
+
+class Post(db.Model):
+    post_id = db.Column(db.Integer, primary_key=True, index=True)
+    post_title = db.Column(db.String(128), nullable=False)
+    post_body = db.Column(db.Text, nullable=False)
+    post_upvote = db.Column(db.Integer, default=0)
+    post_create_time = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
+
+    def __repr__(self):
+        return '<Post {post_id},{post_title}...>'.format(post_id=self.post_id, post_title=self.post_title[:10])
+
+    # 点赞
+    def post_upvote_increase(self):
+        self.post_upvote += 1
+        db.session.add(self)
+
+
 login_manager.anonymous_user = AnonymousUser
 
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
