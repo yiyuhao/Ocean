@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
+{% import "post/_macro_pagination_widget.html" as macros %}
 
 {% block body %}
-    {#    start - 写文章motal#}
+    {# start - 写文章motal#}
     <div class="modal fade" id="writeArticleDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -30,7 +31,7 @@
             </div>
         </div>
     </div>
-    {#    end - 写文章modal #}
+    {# end - 写文章modal #}
     {{ super() }}
 {% endblock %}
 
@@ -45,16 +46,33 @@
                 </a>
             </div>
         {% endif %}
+
+        {# 显示文章列表 #}
+        <ul class="posts">
+            {% for post in posts %}
+                <li class="box-shadow padding-20">
+                    一篇文章 {{ post.post_title }}
+                </li>
+            {% endfor %}
+        </ul>
+
+        {# 分页插件 #}
+        {% if pagination %}
+            <div class="pagination">
+                {{ macros.pagination_widget(pagination, 'main.index') }}
+            </div>
+        {% endif %}
+
     </div>
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
     <script>
-    $(document).ready(function () {
-        $("#post-button").click(function () {
-            $(".form-submit").trigger("click");
+        $(document).ready(function () {
+            $("#post-button").click(function () {
+                $(".form-submit").trigger("click");
+            })
         })
-    })
     </script>
 {% endblock %}

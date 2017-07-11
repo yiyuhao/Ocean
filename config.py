@@ -26,6 +26,9 @@ class Config:
     USER_AVATAR_SUBPATH = 'avatar'
     USER_DEFAULT_AVATAR = 'user_default_avatar.png'
 
+    # 文章分页
+    OCEAN_POSTS_PER_PAGE = 20
+
 
 class DevelopmentConfig(Config):
     DEBUG = True
