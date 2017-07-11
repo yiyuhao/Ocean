@@ -1,16 +1,23 @@
 from . import main
-from .forms import EditProfileForm, EditProfileAdminForm
-from ..models import User, Role
+from .forms import EditProfileForm, EditProfileAdminForm, PostForm
+from ..models import User, Role, Post, Permission
 from app import db
 from app.decorators import admin_required
-from datetime import datetime
 from flask import render_template, abort, request, redirect, url_for, flash, current_app
 from flask_login import current_user, login_required
 
 
-@main.route('/')
+@main.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html', current_time=datetime.utcnow())
+    form = PostForm()
+    if form.validate_on_submit() and current_user.can(Permission.WRITE_ARTICLES):
+        post = Post(post_title=form.post_title.data,
+                    post_body=form.post_body.data,
+                    user=current_user._get_current_object())
+        db.session.add(post)
+        flash('发表成功')
+        return redirect(url_for('main.index'))
+    return render_template('index.html', form=form)
 
 
 @main.route('/user/<user_name>', methods=['GET', 'POST'])

@@ -181,6 +181,8 @@ class AnonymousUser(AnonymousUserMixin):
 
 
 class Post(db.Model):
+    __tablename__ = 'posts'
+
     post_id = db.Column(db.Integer, primary_key=True, index=True)
     post_title = db.Column(db.String(128), nullable=False)
     post_body = db.Column(db.Text, nullable=False)

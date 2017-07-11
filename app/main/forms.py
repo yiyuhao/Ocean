@@ -36,3 +36,9 @@ class EditProfileAdminForm(FlaskForm):
         if field.data != self.user.user_username and \
                 User.query.filter_by(username=field.data).first():
             raise ValidationError('有重复昵称了')
+
+
+class PostForm(FlaskForm):
+    post_title = StringField('题目', validators=[DataRequired()])
+    post_body = TextAreaField('内容', validators=[DataRequired()])
+    submit = SubmitField('发表')

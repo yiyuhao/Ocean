@@ -1,8 +1,15 @@
 
 .box-shadow {
-    -webkit-box-shadow: 0 0 3px rgba(105, 105, 105, .6);
-    -moz-box-shadow: 0 0 3px rgba(105, 105, 105, .6);
-    box-shadow: 0 0 3px rgba(105, 105, 105, .6);
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+    -webkit-box-shadow: 0 0 3px rgba(129, 129, 129, 0.51);
+    -moz-box-shadow: 0 0 3px rgba(129, 129, 129, 0.51);
+    box-shadow: 0 0 3px rgba(129, 129, 129, 0.51);
+}
+
+.padding-20 {
+    padding: 20px;
 }
 
 .page-header-no-bottom {

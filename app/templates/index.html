@@ -1,12 +1,60 @@
 {% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block body %}
+    {#    start - 写文章motal#}
+    <div class="modal fade" id="writeArticleDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">发表水滴</h4>
+                </div>
+
+                <div class="modal-body">
+                    <form class="form" method="post">
+                        {{ form.hidden_tag() }}
+                        {{ wtf.form_field(form.post_title) }}
+                        {{ wtf.form_field(form.post_body, style="min-height: 380px") }}
+                        {{ wtf.form_field(form.submit, class="form-submit", hidden="hidden") }}
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="post-button">发表</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {#    end - 写文章modal #}
+    {{ super() }}
+{% endblock %}
 
 {% block content %}
     {{ super() }}
     <div class="container">
-        <div class="page-header">
-            <h1>你好</h1>
-            <p>现在的时间 {{ moment(current_time).format('LLL') }}</p>
-            <p>{{ moment(current_time).fromNow(refresh=True) }}</p>
-        </div>
+        {% if current_user.can(Permission.WRITE_ARTICLES) %}
+            <div class="box-shadow padding-20">
+                <a data-toggle="modal" data-target="#writeArticleDialog">
+                    <span class="glyphicon glyphicon-edit"></span>
+                    发表一篇水滴
+                </a>
+            </div>
+        {% endif %}
     </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+    $(document).ready(function () {
+        $("#post-button").click(function () {
+            $(".form-submit").trigger("click");
+        })
+    })
+    </script>
 {% endblock %}
