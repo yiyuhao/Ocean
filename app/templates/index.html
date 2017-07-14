@@ -50,15 +50,52 @@
         {# 显示文章列表 #}
         <ul class="posts">
             {% for post in posts %}
-                <li class="box-shadow padding-20">
-                    一篇文章 {{ post.post_title }}
+                <li class="box-shadow padding-post">
+
+                    <div class="post-header">
+                        <div class="post-header-author">
+                            <a href="{{ url_for('main.profile', user_name=post.user.user_name) }}">
+                                <img src="{{ url_for('static', filename="{subpath}/{filename}".format(subpath=current_app.config['USER_AVATAR_SUBPATH'],
+                                                                                                      filename=post.user.user_avatar_hash)) }}"
+                                     width="20" alt="{{ current_user.user_name }}"
+                                     class="img-rounded">
+                            </a>
+                            <span class="post-header-author-name">{{ post.user.user_name }}，</span>
+                            <span class="post-header-author-about-me">{{ post.user.user_about_me }}</span>
+                        </div>
+                        <div class="post-header-timestamp">{{ moment(post.post_create_time).fromNow(refresh=True) }}</div>
+                    </div>
+
+                    <div class="post-title">
+                        <h3>{{ post.post_title }}</h3>
+                    </div>
+
+                    <div class="post-body">
+                        <p class="post-body-content">{{ post.post_body }}</p>
+                        <p class="text-center post-body-link">
+                            <a href="#">点击打开文章</a>
+                        </p>
+                        {# 半透明遮罩层 #}
+                        <div class="post-body-mask"></div>
+                    </div>
+
+                    <div class="post-footer">
+                        <a href="#">
+                            <span class="glyphicon glyphicon-triangle-top"></span>{{ post.post_upvote }}
+                        </a>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <a href="#">
+                            <span class="glyphicon glyphicon-comment"></span>33条评论
+                        </a>
+                    </div>
+
                 </li>
             {% endfor %}
         </ul>
 
         {# 分页插件 #}
         {% if pagination %}
-            <div class="pagination">
+            <div>
                 {{ macros.pagination_widget(pagination, 'main.index') }}
             </div>
         {% endif %}
@@ -72,7 +109,7 @@
         $(document).ready(function () {
             $("#post-button").click(function () {
                 $(".form-submit").trigger("click");
-            })
+            });
         })
     </script>
 {% endblock %}
