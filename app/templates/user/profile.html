@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "macros/_macro_pagination_widget.html" as macros %}
 
 {% block title %}
     Ocean - 个人资料
@@ -12,7 +13,8 @@
                 {% if current_user == user %}
                     <div class="img-mask center-block">
                         <figure class="effect-avatar">
-                            <img src="{{ user_avatar_url }}"
+                            <img src="{{ url_for('static', filename="{subpath}/{filename}".format(subpath=current_app.config['USER_AVATAR_SUBPATH'],
+                                                                                                  filename=user.user_avatar_hash)) }}"
                                  class="img-rounded center-block" width="140" alt="{{ user.user_name }}"/>
                             <figcaption>
                                 <p>修改头像</p>
@@ -21,7 +23,8 @@
                     </div>
                 {% else %}
                     <figure class="effect-avatar">
-                        <img src="{{ user_avatar_url }}"
+                        <img src="{{ url_for('static', filename="{subpath}/{filename}".format(subpath=current_app.config['USER_AVATAR_SUBPATH'],
+                                                                                                  filename=user.user_avatar_hash)) }}"
                              class="img-rounded center-block" width="140" alt="ddd"/>
                     </figure>
                 {% endif %}
@@ -69,6 +72,17 @@
             {% endif %}
         </div>
     </div>
+
+    {# 显示文章列表 #}
+    {% include "post/_posts.html" %}
+
+    {# 分页插件 #}
+    {% if pagination %}
+        <div>
+            {{ macros.pagination_widget(pagination, 'main.index') }}
+        </div>
+    {% endif %}
+
 {% endblock %}
 
 {% block scripts %}

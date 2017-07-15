@@ -5,7 +5,7 @@ from app.models import Role, User
 
 
 class EditProfileForm(FlaskForm):
-    user_about_me = TextAreaField('一句话介绍', validators=[Length(max=64)])
+    user_about_me = TextAreaField('一句话介绍', validators=[Length(max=512)])
     user_location = StringField('所在城市', validators=[Length(max=64)])
     submit = SubmitField('保存')
 
@@ -17,7 +17,7 @@ class EditProfileAdminForm(FlaskForm):
     user_email = StringField('登陆邮箱', validators=[Length(1, 64), DataRequired(), Email()])
     user_confirmed = BooleanField('标记为确认状态')
     role_id = SelectField('角色', coerce=int)
-    user_about_me = TextAreaField('一句话介绍', validators=[Length(max=64)])
+    user_about_me = TextAreaField('一句话介绍', validators=[Length(max=512)])
     user_location = StringField('所在城市', validators=[Length(max=64)])
     submit = SubmitField('确认修改[Admin]')
 

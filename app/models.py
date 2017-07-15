@@ -60,7 +60,7 @@ class User(UserMixin, db.Model):
     user_password_hash = db.Column(db.String(128))
     user_confirmed = db.Column(db.Boolean, default=False)
     user_location = db.Column(db.String(64))
-    user_about_me = db.Column(db.String(64))
+    user_about_me = db.Column(db.String(512))
     user_member_since = db.Column(db.DateTime(), default=datetime.utcnow)
     user_last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
     user_avatar_hash = db.Column(db.String(128))
@@ -168,6 +168,30 @@ class User(UserMixin, db.Model):
         self.user_last_seen = datetime.utcnow()
         db.session.add(self)
 
+    # 生成虚拟用户数据
+    @staticmethod
+    def generate_fake(count=100):
+        from sqlalchemy.exc import IntegrityError
+        from random import seed
+        import forgery_py
+
+        seed()
+        for i in range(count):
+            u = User(user_name=forgery_py.internet.user_name(),
+                     user_email=forgery_py.internet.email_address(),
+                     user_password=forgery_py.lorem_ipsum.word(),
+                     user_confirmed=True,
+                     user_location=forgery_py.address.city(),
+                     user_about_me=forgery_py.lorem_ipsum.sentences(),
+                     user_member_since=forgery_py.date.datetime(past=True),
+                     user_last_seen=forgery_py.date.date(past=True))
+            db.session.add(u)
+            # 生成的user_name有重复风险
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+
 
 # 游客权限
 class AnonymousUser(AnonymousUserMixin):
@@ -198,6 +222,23 @@ class Post(db.Model):
         self.post_upvote += 1
         db.session.add(self)
 
+    # 生成虚拟文章数据
+    @staticmethod
+    def generate_fake(count=300):
+        from random import seed, randint
+        import forgery_py
+
+        seed()
+        user_count = User.query.count()
+        for i in range(count):
+            u = User.query.offset(randint(0, user_count-1)).first()
+            p = Post(post_title=forgery_py.lorem_ipsum.title(),
+                     post_body=forgery_py.lorem_ipsum.sentences(randint(1, 50)),
+                     post_upvote=randint(0, 10000),
+                     post_create_time=forgery_py.date.datetime(past=True),
+                     user=u)
+            db.session.add(p)
+            db.session.commit()
 
 login_manager.anonymous_user = AnonymousUser
 

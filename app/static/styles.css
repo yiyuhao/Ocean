@@ -1,3 +1,23 @@
+/*a标签样式*/
+a {
+    text-decoration: none
+}
+
+a.grey:link {
+    color: #999999;
+}
+
+a.grey:visited {
+    color: #999999;
+}
+
+a.grey:hover {
+    color: #000000
+}
+
+a.grey:active {
+    color: #999999
+}
 
 .box-shadow {
     -webkit-border-radius: 2px;
@@ -19,6 +39,7 @@
     margin: 40px 0 20px;
 }
 
+/*图片半透明遮罩层*/
 .img-mask {
     width: 140px;
     height: 140px;
@@ -153,7 +174,7 @@ p.post-body-link {
     transition: all 0.5s linear;
 }
 
-div.post-body:hover p.post-body-link{
+div.post-body:hover p.post-body-link {
     visibility: visible;
     opacity: 1;
 }

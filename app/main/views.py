@@ -44,10 +44,15 @@ def profile(user_name):
             user.user_avatar = file
             db.session.add(user)
             db.session.commit()
-    user_avatar_uri = url_for('static',
-                              filename="{subpath}/{filename}".format(subpath=current_app.config['USER_AVATAR_SUBPATH'],
-                                                                     filename=user.user_avatar_hash))
-    return render_template('user/profile.html', user=user, user_avatar_url=user_avatar_uri)
+            # 获取文章列表
+    page = request.args.get('page', 1, type=int)
+    pagination = Post.query.filter_by(user=user).order_by(Post.post_create_time.desc()).paginate(
+        page=page,
+        per_page=current_app.config['OCEAN_POSTS_PER_PAGE'],
+        error_out=False
+    )
+    posts = pagination.items
+    return render_template('user/profile.html', user=user, posts=posts, pagination=pagination)
 
 
 @main.route('/edit-profile', methods=['GET', 'POST'])

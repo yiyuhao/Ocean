@@ -40,7 +40,7 @@
     <div class="container">
         {% if current_user.can(Permission.WRITE_ARTICLES) %}
             <div class="box-shadow padding-20">
-                <a data-toggle="modal" data-target="#writeArticleDialog">
+                <a class="grey" data-toggle="modal" data-target="#writeArticleDialog">
                     <span class="glyphicon glyphicon-edit"></span>
                     发表一篇水滴
                 </a>
