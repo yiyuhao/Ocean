@@ -2,11 +2,13 @@ from . import db
 from . import login_manager
 from . import photo_upload
 from .utils.file_processing import hash_filename, rsize
+from app.utils.html_to_text import html_to_text
 from datetime import datetime
 from flask import current_app
 from flask_login import UserMixin, AnonymousUserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
+import bleach
 import os
 
 
@@ -52,6 +54,21 @@ class Role(db.Model):
 
 
 class User(UserMixin, db.Model):
+    """
+
+        =====================================字段说明=====================================
+        user_name             昵称
+        user_email            注册邮箱，用于登录、找回密码
+        user_password_hash    密码hash值
+        user_confirmed        用户邮箱确认状态，注册邮箱验证后为True，才可具备操作权限
+        user_location         所在地
+        user_about_me         一句话介绍
+        user_member_since     注册时间
+        user_last_seen        上次请求时间
+        user_avatar_hash      如'33a7db7_____.jpg'，为uuid
+        =====================================字段说明=====================================
+
+    """
     __tablename__ = 'users'
 
     user_id = db.Column(db.Integer, primary_key=True)
@@ -203,13 +220,28 @@ class AnonymousUser(AnonymousUserMixin):
     def is_administrator(self):
         return False
 
+login_manager.anonymous_user = AnonymousUser
+
 
 class Post(db.Model):
+    """
+
+        =====================================字段说明=====================================
+        post_title             文章标题
+        post_body              非数据库字段，仅用于缓存
+        post_body_html         清理后的html格式字符串
+        post_body_text         post_body的纯文本，只包含内容，不含html格式
+        post_upvote            点赞数
+        post_create_time       发表时间
+        =====================================字段说明=====================================
+
+    """
     __tablename__ = 'posts'
 
     post_id = db.Column(db.Integer, primary_key=True)
     post_title = db.Column(db.String(128), nullable=False)
-    post_body = db.Column(db.Text, nullable=False)
+    post_body_html = db.Column(db.Text, nullable=False)
+    post_body_text = db.Column(db.Text)
     post_upvote = db.Column(db.Integer, default=0)
     post_create_time = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
@@ -231,7 +263,7 @@ class Post(db.Model):
         seed()
         user_count = User.query.count()
         for i in range(count):
-            u = User.query.offset(randint(0, user_count-1)).first()
+            u = User.query.offset(randint(0, user_count - 1)).first()
             p = Post(post_title=forgery_py.lorem_ipsum.title(),
                      post_body=forgery_py.lorem_ipsum.sentences(randint(1, 50)),
                      post_upvote=randint(0, 10000),
@@ -240,10 +272,27 @@ class Post(db.Model):
             db.session.add(p)
             db.session.commit()
 
-login_manager.anonymous_user = AnonymousUser
+    @property
+    def post_body(self):
+        raise AttributeError('post_body属性不可 被访问')
+
+    # 清理传入的原始html字符串，保存至self.post_body_html
+    @post_body.setter
+    def post_body(self, post_body):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
+                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
+                        'h1', 'h2', 'h3', 'p']
+        self.post_body_html = bleach.clean(post_body, tags=allowed_tags, strip=True)
+
+    # html文章内容转换为ASCII纯文本，保存至self.post_body_text
+    @staticmethod
+    def on_changed_body(target, value, oldvalue, initiator):
+        target.post_body_text = html_to_text(markup=value)
+        pass
+
+db.event.listen(Post.post_body_html, 'set', Post.on_changed_body)
 
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
