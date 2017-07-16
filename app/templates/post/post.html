@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Ocean - {{ post.post_title }} - 分享你沉浸的世界
+{% endblock %}
+
+{% block content %}
+    {{ super() }}
+    <div class="container">
+        <ul class="posts">
+            <li class="box-shadow padding-post">
+
+                <div class="post-header">
+                    <div class="post-header-author">
+                        {# 头像 #}
+                        <a class="grey" href="{{ url_for('main.profile', user_name=post.user.user_name) }}">
+                            <img src="{{ url_for('static', filename="{subpath}/{filename}".format(subpath=current_app.config['USER_AVATAR_SUBPATH'],
+                                                                                       filename=post.user.user_avatar_hash)) }}"
+                                 width="16" alt="{{ current_user.user_name }}"
+                                 class="img-rounded">
+                        </a>
+                        {# 昵称 #}
+                        <a class="grey" href="{{ url_for('main.profile', user_name=post.user.user_name) }}">
+                            {{ post.user.user_name }}
+                        </a>
+                        {# 简介 #}
+                        {% if post.user.user_about_me %}
+                            <span>，{{ post.user.user_about_me }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="post-header-timestamp">{{ moment(post.post_create_time).fromNow(refresh=True) }}</div>
+                </div>
+
+                {# 文章题目 #}
+                <div class="post-title">
+                    <h2 align="center">{{ post.post_title }}</h2>
+                </div>
+
+                {# 文章内容 #}
+                <div class="post-body-show-all">
+                    <p class="post-body-content-show-all">{{ post.post_body_html | safe }}</p>
+                </div>
+
+                {# 点赞及评论 #}
+                <div class="post-footer">
+                    <a class="grey" href="#">
+                        <span class="glyphicon glyphicon-triangle-top"></span>{{ post.post_upvote }}
+                    </a>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <a class="grey" href="#">
+                        <span class="glyphicon glyphicon-comment"></span>33条评论
+                    </a>
+                </div>
+
+            </li>
+        </ul>
+    </div>
+{% endblock %}

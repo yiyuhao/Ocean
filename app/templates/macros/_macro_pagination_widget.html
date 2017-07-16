@@ -1,4 +1,4 @@
-{% macro pagination_widget(pagination, endpoint) %}
+{% macro pagination_widget(pagination, endpoint, fragment='') %}
 
     {# 只有一页不显示分页栏 #}
     {% if pagination.has_prev or pagination.has_next %}
@@ -7,7 +7,7 @@
             {# 上一页 #}
             {% if pagination.has_prev %}
                 <li>
-                    <a href="{{ url_for(endpoint, page = pagination.page - 1, **kwargs) }}">&laquo;</a>
+                    <a href="{{ url_for(endpoint, page = pagination.prev_num, **kwargs) }}{{ fragment }}">&laquo;</a>
                 </li>
             {% else %}
                 <li class="disabled">
@@ -19,7 +19,7 @@
             {% for p in pagination.iter_pages() %}
                 {% if p %}
                     <li{% if p == pagination.page %} class="active"{% endif %}>
-                        <a href="{{ url_for(endpoint, page = p, **kwargs) }}">{{ p }}</a>
+                        <a href="{{ url_for(endpoint, page = p, **kwargs) }}{{ fragment }}">{{ p }}</a>
                     </li>
                 {% else %}
                     <li class="disabled">
@@ -31,7 +31,7 @@
             {# 下一页 #}
             {% if pagination.has_next %}
                 <li>
-                    <a href="{{ url_for(endpoint, page = pagination.page + 1, **kwargs) }}">&raquo;</a>
+                    <a href="{{ url_for(endpoint, page = pagination.next_num, **kwargs) }}{{ fragment }} ">&raquo;</a>
                 </li>
             {% else %}
                 <li class="disabled">

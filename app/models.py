@@ -3,12 +3,12 @@ from . import login_manager
 from . import photo_upload
 from .utils.file_processing import hash_filename, rsize
 from app.utils.html_to_text import html_to_text
+from app.utils.xss_filter import html_clean
 from datetime import datetime
 from flask import current_app
 from flask_login import UserMixin, AnonymousUserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
-import bleach
 import os
 
 
@@ -276,15 +276,12 @@ class Post(db.Model):
     def post_body(self):
         raise AttributeError('post_body属性不可 被访问')
 
-    # 清理传入的原始html字符串，保存至self.post_body_html
+    # XSS保护 清理传入的原始html字符串
     @post_body.setter
     def post_body(self, post_body):
-        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
-                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
-                        'h1', 'h2', 'h3', 'p']
-        self.post_body_html = bleach.clean(post_body, tags=allowed_tags, strip=True)
+        self.post_body_html = html_clean(post_body)
 
-    # html文章内容转换为ASCII纯文本，保存至self.post_body_text
+    # html文章内容转换为ASCII纯文本，作为首页文章梗概
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):
         target.post_body_text = html_to_text(markup=value)

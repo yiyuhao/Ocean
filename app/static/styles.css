@@ -1,22 +1,22 @@
 /*a标签样式*/
-a {
-    text-decoration: none
-}
-
 a.grey:link {
     color: #999999;
+    text-decoration: none;
 }
 
 a.grey:visited {
     color: #999999;
+    text-decoration: none;
 }
 
 a.grey:hover {
-    color: #000000
+    color: #000000;
+    text-decoration: none;
 }
 
 a.grey:active {
-    color: #999999
+    color: #999999;
+    text-decoration: none;
 }
 
 .box-shadow {
@@ -30,6 +30,11 @@ a.grey:active {
 
 .padding-20 {
     padding: 20px;
+}
+
+.page-header-profile {
+  margin: 20px 0;
+  border-bottom: 1px solid #eee;
 }
 
 .page-header-no-bottom {
@@ -144,6 +149,10 @@ div.post-body {
     z-index: 3;
 }
 
+div.post-body-show-all {
+    position: relative;
+}
+
 .post-body p {
     margin: 0;
 }
@@ -183,5 +192,10 @@ p.post-body-content {
     height: 92px;
     overflow: hidden;
     word-wrap: break-word;
-    word-break:normal;
+    word-break: normal;
+}
+
+p.post-body-content-show-all {
+    word-wrap: break-word;
+    word-break: normal;
 }

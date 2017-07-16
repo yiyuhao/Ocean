@@ -2,44 +2,6 @@
 {% import "bootstrap/wtf.html" as wtf %}
 {% import "macros/_macro_pagination_widget.html" as macros %}
 
-{% block head %}
-    {{ super() }}
-    <script src="//cdn.ckeditor.com/4.4.6/standard/ckeditor.js"></script>
-{% endblock %}
-
-{% block body %}
-    {# start - 写文章motal#}
-    <div class="modal fade" id="writeArticleDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    <h4 class="modal-title" id="myModalLabel">发表水滴</h4>
-                </div>
-
-                <div class="modal-body">
-                    <form class="form" method="post">
-                        {{ form.hidden_tag() }}
-                        {{ wtf.form_field(form.post_title) }}
-                        {{ wtf.form_field(form.post_body, class="ckeditor", style="min-height: 380px") }}
-                        {{ wtf.form_field(form.submit, class="form-submit", hidden="hidden") }}
-                    </form>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary" id="post-button">发表</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    {# end - 写文章modal #}
-    {{ super() }}
-{% endblock %}
-
 {% block content %}
     {{ super() }}
     <div class="container">
@@ -69,9 +31,24 @@
     {{ super() }}
     <script>
         $(document).ready(function () {
+            {# 点击隐藏的文章表单提交按钮 #}
             $("#post-button").click(function () {
                 $(".form-submit").trigger("click");
             });
-        })
+
+            {# 解决ckeditor在boostrap/modal中弹框无法输入的问题 #}
+            $.fn.modal.Constructor.prototype.enforceFocus = function () {
+                modal_this = this;
+                $(document).on('focusin.modal', function (e) {
+                    if (modal_this.$element[0] !== e.target
+                        && !modal_this.$element.has(e.target).length
+                        && !$(e.target.parentNode).hasClass('cke_dialog_ui_input_select')
+                        && !$(e.target.parentNode).hasClass('cke_dialog_ui_input_text')) {
+                        modal_this.$element.focus()
+                    }
+                })
+            };
+        });
+
     </script>
 {% endblock %}

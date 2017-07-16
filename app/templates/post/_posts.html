@@ -3,7 +3,6 @@
         <li class="box-shadow padding-post">
 
             <div class="post-header">
-
                 <div class="post-header-author">
                     {# 头像 #}
                     <a class="grey" href="{{ url_for('main.profile', user_name=post.user.user_name) }}">
@@ -24,19 +23,24 @@
                 <div class="post-header-timestamp">{{ moment(post.post_create_time).fromNow(refresh=True) }}</div>
             </div>
 
+            {# 文章题目 #}
             <div class="post-title">
                 <h3>{{ post.post_title }}</h3>
             </div>
 
-            <div class="post-body">
+            {# 文章缩略 #}
+            <div class="post-body" onClick="javascript:window.open('{{ url_for('main.post', post_id=post.post_id) }}','_blank')">
                 <p class="post-body-content">{{ post.post_body_text }}</p>
                 <p class="text-center post-body-link">
-                    <a class="grey" href="#">点击打开文章</a>
+                    <a class="grey" href="{{ url_for('main.post', post_id=post.post_id) }}" target="_blank">
+                        点击打开文章
+                    </a>
                 </p>
                 {# 半透明遮罩层 #}
                 <div class="post-body-mask"></div>
             </div>
 
+            {# 点赞及评论 #}
             <div class="post-footer">
                 <a class="grey" href="#">
                     <span class="glyphicon glyphicon-triangle-top"></span>{{ post.post_upvote }}

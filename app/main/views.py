@@ -9,10 +9,10 @@ from flask_login import current_user, login_required
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
-    form = PostForm()
-    if form.validate_on_submit() and current_user.can(Permission.WRITE_ARTICLES):
-        post = Post(post_title=form.post_title.data,
-                    post_body=form.post_body.data,
+    post_form = PostForm()
+    if post_form.validate_on_submit() and current_user.can(Permission.WRITE_ARTICLES):
+        post = Post(post_title=post_form.post_title.data,
+                    post_body=post_form.post_body.data,
                     user=current_user._get_current_object())
         db.session.add(post)
         flash('发表成功')
@@ -25,7 +25,7 @@ def index():
         error_out=False
     )
     posts = pagination.items
-    return render_template('index.html', form=form, posts=posts, pagination=pagination)
+    return render_template('index.html', post_form=post_form, posts=posts, pagination=pagination)
 
 
 @main.route('/user/<user_name>', methods=['GET', 'POST'])
@@ -44,7 +44,7 @@ def profile(user_name):
             user.user_avatar = file
             db.session.add(user)
             db.session.commit()
-            # 获取文章列表
+    # 获取文章列表
     page = request.args.get('page', 1, type=int)
     pagination = Post.query.filter_by(user=user).order_by(Post.post_create_time.desc()).paginate(
         page=page,
@@ -93,3 +93,9 @@ def edit_profile_admin(uid):
     form.user_about_me.data = user.user_about_me
     form.user_location.data = user.user_location
     return render_template('user/edit_profile_admin.html', form=form, user=user)
+
+
+@main.route('/article/<int:post_id>')
+def post(post_id):
+    post = Post.query.get_or_404(post_id)
+    return render_template('post/post.html', post=post)
