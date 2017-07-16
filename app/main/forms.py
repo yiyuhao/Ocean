@@ -42,3 +42,9 @@ class PostForm(FlaskForm):
     post_title = StringField('题目', validators=[DataRequired()])
     post_body = TextAreaField('内容', validators=[DataRequired()])
     submit = SubmitField('发表')
+
+
+class EditPostForm(FlaskForm):
+    post_title = StringField('题目', validators=[DataRequired()])
+    post_body = TextAreaField('内容', validators=[DataRequired()])
+    submit = SubmitField('修改')

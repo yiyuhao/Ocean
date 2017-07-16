@@ -1,16 +1,26 @@
 {% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
 
 {% block title %}
     Ocean - 分享你沉浸的世界
 {% endblock %}
 
 {% block head %}
+    {# ckeditor #}
+    <script type="text/javascript" id="ckeditor-js"></script>
+    <script>
+        //判断是否宽屏调用basic或full版本ckeditor
+        var winWide = window.screen.width;
+        if (winWide <= 1024) {//1024及以下分辨率
+            document.getElementById("ckeditor-js").src = "//cdn.ckeditor.com/4.7.1/basic/ckeditor.js";
+        } else {
+            document.getElementById("ckeditor-js").src = "//cdn.ckeditor.com/4.7.1/full/ckeditor.js";
+        }
+    </script>
     {{ super() }}
     <link rel="shortcut icon" href="{{ url_for('static', filename='ocean_logo_100.png') }}" type="image/x-icon">
     <link rel="icon" href="{{ url_for('static', filename='ocean_logo_100.png') }}" type="image/x-icon">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
-    {# ckeditor #}
-    <script type="text/javascript" id="ckeditor-js"></script>
 {% endblock %}
 
 {# 编辑文章模态框 #}
@@ -32,7 +42,7 @@
                         <form class="form" method="post">
                             {{ post_form.hidden_tag() }}
                             {{ wtf.form_field(post_form.post_title) }}
-                            {{ wtf.form_field(post_form.post_body, class="ckeditor", style="min-height: 380px") }}
+                            {{ wtf.form_field(post_form.post_body, class="ckeditor", id="ckeditor-textarea") }}
                             {{ wtf.form_field(post_form.submit, class="form-submit", hidden="hidden") }}
                         </form>
                     </div>
@@ -114,15 +124,21 @@
     {{ moment.include_moment() }}
     {{ moment.lang('zh-cn') }}
     <script>
-        $(function () {
-            //判断是否宽屏调用basic或full版本ckeditor
-            var winWide = window.screen.width;
-            if (winWide <= 1024) {//1024及以下分辨率
-                $("#ckeditor-js").attr("src", "//cdn.ckeditor.com/4.7.1/basic/ckeditor.js");
-            } else {
-                $("#ckeditor-js").attr("src", "//cdn.ckeditor.com/4.7.1/full/ckeditor.js");
-            }
-
-        });
+        {# 改变ckeditor textarea的默认高度(不含工具栏) #}
+        window.onload = function () {
+            if (window.innerHeight)
+                var winHeight = window.innerHeight;
+            else if ((document.body) && (document.body.clientHeight))
+                winHeight = document.body.clientHeight;
+            // 响应式
+            if (winHeight > 600)
+                var ckeditor_content_height = winHeight * 0.55;
+            else
+                ckeditor_content_height = winHeight * 0.35;
+            CKEDITOR.on('instanceReady', function (e) {
+                var ckeditor_content = document.getElementById('cke_1_contents');
+                ckeditor_content.style.height = ckeditor_content_height + 'px';
+            });
+        };
     </script>
 {% endblock %}

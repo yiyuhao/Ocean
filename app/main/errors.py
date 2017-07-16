@@ -3,8 +3,8 @@ from flask import render_template
 
 
 @main.app_errorhandler(403)
-def permiss_forbiden():
-    return render_template('erros/403.html'), 403
+def permission_forbiden(e):
+    return render_template('errors/403.html'), 403
 
 
 @main.app_errorhandler(404)

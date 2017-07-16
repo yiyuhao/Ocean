@@ -5,6 +5,11 @@ from .models import Permission
 
 
 def permission_required(permissions):
+    """
+    权限要求
+    :param permissions: (int) 具有的权限，如Permission.WRITE_ARTICLES
+    :return: func f
+    """
     def wrapper(f):
         @wraps(f)
         def check_permissions(*args, **kwargs):

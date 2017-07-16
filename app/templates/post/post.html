@@ -28,7 +28,23 @@
                             <span>，{{ post.user.user_about_me }}</span>
                         {% endif %}
                     </div>
+                    {# 修改时间 #}
                     <div class="post-header-timestamp">{{ moment(post.post_create_time).fromNow(refresh=True) }}</div>
+                    {# 编辑按钮 #}
+                    {% if current_user == post.user %}
+                        <div class="post-header-edit-post">
+                            <a class="grey" href="{{ url_for('main.edit_post', post_id=post.post_id) }}"
+                               target="_blank">
+                                编辑文章
+                            </a>
+                        </div>
+                    {% elif current_user.is_administrator %}
+                        <div class="post-header-edit-post">
+                            <a class="grey" href="#" target="_blank">
+                                [Admin]编辑文章
+                            </a>
+                        </div>
+                    {% endif %}
                 </div>
 
                 {# 文章题目 #}

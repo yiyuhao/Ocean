@@ -33,8 +33,8 @@ a.grey:active {
 }
 
 .page-header-profile {
-  margin: 20px 0;
-  border-bottom: 1px solid #eee;
+    margin: 20px 0;
+    border-bottom: 1px solid #eee;
 }
 
 .page-header-no-bottom {
@@ -135,6 +135,24 @@ div.post-header-author {
 
 div.post-header-timestamp {
     float: right;
+}
+
+div.post-header-edit-post {
+    float: right;
+    margin-right: 10px;
+    z-index: 4;
+    visibility: hidden;
+    opacity: 0;
+    -webkit-transition: 0.5s;
+    -moz-transition: all 0.5s linear;
+    -ms-transition: all 0.5s linear;
+    -o-transition: all 0.5s linear;
+    transition: all 0.5s linear;
+}
+
+li.box-shadow:hover div.post-header-edit-post {
+    visibility: visible;
+    opacity: 1;
 }
 
 div.post-title h3 {

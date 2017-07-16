@@ -1,8 +1,8 @@
 from . import main
-from .forms import EditProfileForm, EditProfileAdminForm, PostForm
+from .forms import EditProfileForm, EditProfileAdminForm, PostForm, EditPostForm
 from ..models import User, Role, Post, Permission
 from app import db
-from app.decorators import admin_required
+from app.decorators import admin_required, permission_required
 from flask import render_template, abort, request, redirect, url_for, flash, current_app
 from flask_login import current_user, login_required
 
@@ -99,3 +99,22 @@ def edit_profile_admin(uid):
 def post(post_id):
     post = Post.query.get_or_404(post_id)
     return render_template('post/post.html', post=post)
+
+
+@main.route('/edit-article/<int:post_id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.WRITE_ARTICLES)
+def edit_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.user != current_user and not current_user.is_administrator:
+        abort(403)
+    form = EditPostForm()
+    if form.validate_on_submit():
+        post.post_title = form.post_title.data
+        post.post_body = form.post_body.data
+        db.session.add(post)
+        flash('修改成功')
+        return redirect(url_for('main.post', post_id=post.post_id))
+    form.post_title.data = post.post_title
+    form.post_body.data = post.post_body_html
+    return render_template('post/edit_post.html', form=form)
