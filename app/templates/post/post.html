@@ -49,7 +49,11 @@
 
                 {# 文章题目 #}
                 <div class="post-title">
-                    <h2 align="center">{{ post.post_title }}</h2>
+                    <h2 align="center">
+                        <a class="black" href="{{ url_for('main.post', post_id=post.post_id) }}" target="_blank">
+                            {{ post.post_title }}
+                        </a>
+                    </h2>
                 </div>
 
                 {# 文章内容 #}
