@@ -182,4 +182,6 @@ div.post-body:hover p.post-body-link {
 p.post-body-content {
     height: 92px;
     overflow: hidden;
+    word-wrap: break-word;
+    word-break:normal;
 }

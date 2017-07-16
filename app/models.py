@@ -288,7 +288,6 @@ class Post(db.Model):
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):
         target.post_body_text = html_to_text(markup=value)
-        pass
 
 db.event.listen(Post.post_body_html, 'set', Post.on_changed_body)
 
