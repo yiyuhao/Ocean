@@ -25,13 +25,13 @@
                 {# 编辑按钮 #}
                 {% if current_user == post.user %}
                     <div class="post-header-edit-post">
-                        <a class="grey" href="{{ url_for('main.edit_post', post_id=post.post_id) }}" target="_blank">
+                        <a class="grey" href="{{ url_for('main.edit_post', post_id=post.post_id) }}">
                             编辑文章
                         </a>
                     </div>
                 {% elif current_user.is_administrator %}
                     <div class="post-header-edit-post">
-                        <a class="grey" href="#" target="_blank">
+                        <a class="grey" href="{{ url_for('main.edit_post', post_id=post.post_id) }}">
                             [Admin]编辑文章
                         </a>
                     </div>
@@ -41,18 +41,19 @@
             {# 文章题目 #}
             <div class="post-title">
                 <h3>
-                    <a class="black" href="{{ url_for('main.post', post_id=post.post_id) }}" target="_blank">
+                    <a class="black" href="{{ url_for('main.post', post_id=post.post_id) }}">
                         {{ post.post_title }}
                     </a>
                 </h3>
             </div>
 
             {# 文章缩略 #}
+            {# todo 不打开新窗口 #}
             <div class="post-body"
-                 onClick="javascript:window.open('{{ url_for('main.post', post_id=post.post_id) }}','_blank')">
+                 onClick="javascript:window.open('{{ url_for('main.post', post_id=post.post_id) }}')">
                 <p class="post-body-content">{{ post.post_body_text }}</p>
                 <p class="text-center post-body-link">
-                    <a class="grey" href="{{ url_for('main.post', post_id=post.post_id) }}" target="_blank">
+                    <a class="grey" href="{{ url_for('main.post', post_id=post.post_id) }}">
                         点击打开文章
                     </a>
                 </p>

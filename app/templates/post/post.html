@@ -33,14 +33,13 @@
                     {# 编辑按钮 #}
                     {% if current_user == post.user %}
                         <div class="post-header-edit-post">
-                            <a class="grey" href="{{ url_for('main.edit_post', post_id=post.post_id) }}"
-                               target="_blank">
+                            <a class="grey" href="{{ url_for('main.edit_post', post_id=post.post_id) }}">
                                 编辑文章
                             </a>
                         </div>
                     {% elif current_user.is_administrator %}
                         <div class="post-header-edit-post">
-                            <a class="grey" href="#" target="_blank">
+                            <a class="grey" href="{{ url_for('main.edit_post', post_id=post.post_id) }}">
                                 [Admin]编辑文章
                             </a>
                         </div>
@@ -49,11 +48,7 @@
 
                 {# 文章题目 #}
                 <div class="post-title">
-                    <h2 align="center">
-                        <a class="black" href="{{ url_for('main.post', post_id=post.post_id) }}" target="_blank">
-                            {{ post.post_title }}
-                        </a>
-                    </h2>
+                    <h2 align="center">{{ post.post_title }}</h2>
                 </div>
 
                 {# 文章内容 #}
