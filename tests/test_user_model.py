@@ -1,6 +1,6 @@
 from unittest import TestCase
 from app import create_app, db
-from app.models import User, Role, Permission, AnonymousUser
+from app.models import User, Role, Permission, AnonymousUser, Post
 from datetime import datetime
 from time import sleep
 
@@ -103,3 +103,55 @@ class UserModelTestCase(TestCase):
         u.refresh_last_seen()
         # 刷新用户最近登陆时间
         self.assertGreater(u.user_last_seen, user_register_time)
+
+    # 检查点赞
+    def test_upvote(self):
+        u1 = User(user_email='example1@example.com', user_password='password')
+        u2 = User(user_email='example2@example.com', user_password='password')
+        u3 = User(user_email='example3@example.com', user_password='password')
+        p1 = Post(post_title='title', post_body='body')
+        p2 = Post(post_title='title', post_body='body')
+        p3 = Post(post_title='title', post_body='body')
+        db.session.add_all([u1, u2, u3, p1, p2, p3])
+        db.session.commit()
+        u1.upvote(p1)
+        u1.upvote(p2)
+        u2.upvote(p2)
+        u2.upvote(p3)
+        u3.upvote(p3)
+        u3.upvote(p1)
+        db.session.commit()
+
+        # 检查点赞关系正确
+        self.assertIn(p1, u1.upvote_posts.all())
+        self.assertIn(p2, u1.upvote_posts.all())
+        self.assertNotIn(p3, u1.upvote_posts.all())
+        self.assertIn(p2, u2.upvote_posts.all())
+        self.assertIn(p3, u2.upvote_posts.all())
+        self.assertNotIn(p1, u2.upvote_posts.all())
+        self.assertIn(p3, u3.upvote_posts.all())
+        self.assertIn(p1, u3.upvote_posts.all())
+        self.assertNotIn(p2, u3.upvote_posts.all())
+
+        self.assertIn(u1, p1.upvoters.all())
+        self.assertIn(u1, p2.upvoters.all())
+        self.assertNotIn(u1, p3.upvoters.all())
+        self.assertIn(u2, p2.upvoters.all())
+        self.assertIn(u2, p3.upvoters.all())
+        self.assertNotIn(u2, p1.upvoters.all())
+        self.assertIn(u3, p3.upvoters.all())
+        self.assertIn(u3, p1.upvoters.all())
+        self.assertNotIn(u3, p2.upvoters.all())
+
+        # 检查取消点赞
+        u1.cancel_upvote(p1)
+        u2.cancel_upvote(p2)
+        u3.cancel_upvote(p3)
+        db.session.commit()
+
+        self.assertNotIn(p1, u1.upvote_posts.all())
+        self.assertNotIn(p2, u2.upvote_posts.all())
+        self.assertNotIn(p3, u3.upvote_posts.all())
+        self.assertNotIn(u1, p1.upvoters.all())
+        self.assertNotIn(u2, p2.upvoters.all())
+        self.assertNotIn(u3, p3.upvoters.all())

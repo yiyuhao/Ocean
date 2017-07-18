@@ -11,6 +11,13 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 
+# 点赞多对多关系
+# ORM - User.upvote_posts Post.upvoters
+upvotes = db.Table(
+    'upvotes',
+    db.Column('user_id', db.Integer, db.ForeignKey('users.user_id')),
+    db.Column('post_id', db.Integer, db.ForeignKey('posts.post_id')))
+
 
 class Permission:
     FOLLOW = 0b00000001
@@ -83,6 +90,10 @@ class User(UserMixin, db.Model):
     user_avatar_hash = db.Column(db.String(128))
     role_id = db.Column(db.Integer, db.ForeignKey('roles.role_id'))
     posts = db.relationship('Post', backref='user', lazy='dynamic')
+    upvote_posts = db.relationship('Post',
+                                   secondary=upvotes,
+                                   backref=db.backref('upvoters', lazy='dynamic'),
+                                   lazy='dynamic')
 
     def __repr__(self):
         return '<User {}>'.format(self.user_name)
@@ -209,6 +220,18 @@ class User(UserMixin, db.Model):
             except IntegrityError:
                 db.session.rollback()
 
+    # 给文章点赞
+    def upvote(self, post):
+        if not self.upvote_posts.filter_by(post_id=post.post_id).first():
+            self.upvote_posts.append(post)
+            db.session.add(self)
+
+    # 取消点赞
+    def cancel_upvote(self, post):
+        if self.upvote_posts.filter_by(post_id=post.post_id).first():
+            self.upvote_posts.remove(post)
+            db.session.add(self)
+
 
 # 游客权限
 class AnonymousUser(AnonymousUserMixin):
@@ -219,6 +242,7 @@ class AnonymousUser(AnonymousUserMixin):
     @property
     def is_administrator(self):
         return False
+
 
 login_manager.anonymous_user = AnonymousUser
 
@@ -290,5 +314,6 @@ class Post(db.Model):
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):
         target.post_body_text = html_to_text(markup=value)
+
 
 db.event.listen(Post.post_body_html, 'set', Post.on_changed_body)
