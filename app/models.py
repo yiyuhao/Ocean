@@ -222,15 +222,19 @@ class User(UserMixin, db.Model):
 
     # 给文章点赞
     def upvote(self, post):
-        if not self.upvote_posts.filter_by(post_id=post.post_id).first():
+        if not self.is_upvote(post):
             self.upvote_posts.append(post)
             db.session.add(self)
 
     # 取消点赞
     def cancel_upvote(self, post):
-        if self.upvote_posts.filter_by(post_id=post.post_id).first():
+        if self.is_upvote(post):
             self.upvote_posts.remove(post)
             db.session.add(self)
+
+    # 检查用户是否给某文章点赞
+    def is_upvote(self, post):
+        return True if self.upvote_posts.filter_by(post_id=post.post_id).first() else False
 
 
 # 游客权限
@@ -241,6 +245,9 @@ class AnonymousUser(AnonymousUserMixin):
 
     @property
     def is_administrator(self):
+        return False
+
+    def is_upvote(self, post):
         return False
 
 
@@ -271,7 +278,6 @@ class Post(db.Model):
     post_title = db.Column(db.String(128), nullable=False)
     post_body_html = db.Column(db.Text, nullable=False)
     post_body_text = db.Column(db.Text)
-    post_upvote = db.Column(db.Integer, default=0)
     post_create_time = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
 

@@ -63,8 +63,8 @@
 
             {# 点赞及评论 #}
             <div class="post-footer">
-                <a class="grey" href="#">
-                    <span class="glyphicon glyphicon-triangle-top"></span>{{ post.post_upvote }}
+                <a class="grey{% if current_user.is_upvote(post) %} high-light{% endif %}" href="#">
+                    <span class="glyphicon glyphicon-triangle-top"></span>{{ post.upvoters.count() }}
                 </a>
                 &nbsp;&nbsp;&nbsp;&nbsp;
                 <a class="grey" href="#">
