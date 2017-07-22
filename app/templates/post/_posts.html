@@ -48,9 +48,8 @@
             </div>
 
             {# 文章缩略 #}
-            {# todo 不打开新窗口 #}
             <div class="post-body"
-                 onClick="javascript:window.open('{{ url_for('main.post', post_id=post.post_id) }}')">
+                 onClick="window.location.href='{{ url_for('main.post', post_id=post.post_id) }}';">
                 <p class="post-body-content">{{ post.post_body_text }}</p>
                 <p class="text-center post-body-link">
                     <a class="grey" href="{{ url_for('main.post', post_id=post.post_id) }}">
@@ -63,9 +62,19 @@
 
             {# 点赞及评论 #}
             <div class="post-footer">
-                <a class="grey{% if current_user.is_upvote(post) %} high-light{% endif %}" href="#">
-                    <span class="glyphicon glyphicon-triangle-top"></span>{{ post.upvoters.count() }}
-                </a>
+                {% if current_user.is_anonymous %}
+                    {# 匿名用户不可点击，显示禁用光标 #}
+                    <a class="grey-disabled" href="javascript:void(0);">
+                        <span class="glyphicon glyphicon-triangle-top"></span>{{ post.upvoters.count() }}
+                    </a>
+                {% else %}
+                    {# onclick触发ajax请求，刷新点赞状态 #}
+                    <a class="grey{% if current_user.is_upvote(post) %} high-light{% endif %}"
+                       href="javascript:void(0);"
+                       onclick="ajax_upvote({{ post.post_id }}, this)">
+                        <span class="glyphicon glyphicon-triangle-top"></span>{{ post.upvoters.count() }}
+                    </a>
+                {% endif %}
                 &nbsp;&nbsp;&nbsp;&nbsp;
                 <a class="grey" href="#">
                     <span class="glyphicon glyphicon-comment"></span>33条评论

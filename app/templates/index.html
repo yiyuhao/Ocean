@@ -50,5 +50,21 @@
             };
         });
 
+        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+        $UPVOTE_ICON = '<span class="glyphicon glyphicon-triangle-top"></span>';
+        function ajax_upvote(post_id, elem_a) {
+            $.getJSON($SCRIPT_ROOT + '/upvote',
+                      {post_id: post_id},
+                      function (data) {
+                          if (data.is_current_user_upvoted == true){
+                              $(elem_a).attr("class", "grey high-light");
+                              //为了防止用户疑惑，不获取最新的点赞数，而是直接加1或减1
+                              $(elem_a).text(parseInt($(elem_a).text()) + 1);}
+                          else {
+                              $(elem_a).attr("class", "grey");
+                              $(elem_a).text(parseInt($(elem_a).text()) - 1);}
+                          //点赞图标
+                          $(elem_a).prepend($UPVOTE_ICON)});
+        }
     </script>
 {% endblock %}

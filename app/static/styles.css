@@ -19,6 +19,31 @@ a.grey:active {
     text-decoration: none;
 }
 
+/*匿名用户*/
+a.grey-disabled {
+    cursor: not-allowed;
+}
+
+a.grey-disabled:link {
+    color: #999999;
+    text-decoration: none;
+}
+
+a.grey-disabled:visited {
+    color: #999999;
+    text-decoration: none;
+}
+
+a.grey-disabled:hover {
+    color: #999999;
+    text-decoration: none;
+}
+
+a.grey-disabled:active {
+    color: #999999;
+    text-decoration: none;
+}
+
 a.black:link {
     color: #000000;
     text-decoration: none;
@@ -36,6 +61,16 @@ a.black:hover {
 
 a.black:active {
     color: #000000;
+    text-decoration: none;
+}
+
+a.high-light:link {
+    color: #000000;
+    text-decoration: none;
+}
+
+a.high-light:hover {
+    color: #999999;
     text-decoration: none;
 }
 

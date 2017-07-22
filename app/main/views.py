@@ -3,7 +3,7 @@ from .forms import EditProfileForm, EditProfileAdminForm, PostForm, EditPostForm
 from ..models import User, Role, Post, Permission
 from app import db
 from app.decorators import admin_required, permission_required
-from flask import render_template, abort, request, redirect, url_for, flash, current_app
+from flask import render_template, abort, request, redirect, url_for, flash, current_app, jsonify
 from flask_login import current_user, login_required
 
 
@@ -118,3 +118,16 @@ def edit_post(post_id):
     form.post_title.data = post.post_title
     form.post_body.data = post.post_body_html
     return render_template('post/edit_post.html', form=form)
+
+
+@main.route('/upvote')
+def upvote():
+    """
+        处理用户点赞某文章，post_id以参数传入request.args
+    :return: (json response)
+             {'is_current_user_upvoted': true} 返回用户是否点赞了该文章
+    """
+    post_id = request.args.get('post_id')
+    post = Post.query.get_or_404(post_id)
+    current_user.upvote_or_cancel(post)
+    return jsonify(is_current_user_upvoted=current_user.is_upvote(post))

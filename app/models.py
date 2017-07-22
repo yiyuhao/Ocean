@@ -232,6 +232,14 @@ class User(UserMixin, db.Model):
             self.upvote_posts.remove(post)
             db.session.add(self)
 
+    # 点赞或取消
+    def upvote_or_cancel(self, post):
+        if self.is_upvote(post):
+            self.upvote_posts.remove(post)
+        else:
+            self.upvote_posts.append(post)
+        db.session.add(self)
+
     # 检查用户是否给某文章点赞
     def is_upvote(self, post):
         return True if self.upvote_posts.filter_by(post_id=post.post_id).first() else False

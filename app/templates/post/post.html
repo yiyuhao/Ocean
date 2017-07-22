@@ -58,10 +58,19 @@
 
                 {# 点赞及评论 #}
                 <div class="post-footer">
-                {# todo #}
-                    <a class="grey{% if current_user.is_upvote(post) %} high-light{% endif %}" href="javascript:">
-                        <span class="glyphicon glyphicon-triangle-top"></span>{{ post.upvoters.count() }}
-                    </a>
+                    {% if current_user.is_anonymous %}
+                        {# 匿名用户不可点击，显示禁用光标 #}
+                        <a class="grey-disabled" href="javascript:void(0);">
+                            <span class="glyphicon glyphicon-triangle-top"></span>{{ post.upvoters.count() }}
+                        </a>
+                    {% else %}
+                        {# onclick触发ajax请求，刷新点赞状态 #}
+                        <a class="grey{% if current_user.is_upvote(post) %} high-light{% endif %}"
+                           href="javascript:void(0);"
+                           onclick="ajax_upvote({{ post.post_id }}, this)">
+                            <span class="glyphicon glyphicon-triangle-top"></span>{{ post.upvoters.count() }}
+                        </a>
+                    {% endif %}
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <a class="grey" href="#">
                         <span class="glyphicon glyphicon-comment"></span>33条评论
@@ -71,4 +80,49 @@
             </li>
         </ul>
     </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        $(function () {
+            {# 点击隐藏的文章表单提交按钮 #}
+            $("#post-button").click(function () {
+                $(".form-submit").trigger("click");
+            });
+
+            {# 解决ckeditor在boostrap/modal中弹框无法输入的问题 #}
+            $.fn.modal.Constructor.prototype.enforceFocus = function () {
+                modal_this = this;
+                $(document).on('focusin.modal', function (e) {
+                    if (modal_this.$element[0] !== e.target
+                        && !modal_this.$element.has(e.target).length
+                        && !$(e.target.parentNode).hasClass('cke_dialog_ui_input_select')
+                        && !$(e.target.parentNode).hasClass('cke_dialog_ui_input_text')) {
+                        modal_this.$element.focus()
+                    }
+                })
+            };
+        });
+
+        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+        $UPVOTE_ICON = '<span class="glyphicon glyphicon-triangle-top"></span>';
+        function ajax_upvote(post_id, elem_a) {
+            $.getJSON($SCRIPT_ROOT + '/upvote',
+                {post_id: post_id},
+                function (data) {
+                    if (data.is_current_user_upvoted == true) {
+                        $(elem_a).attr("class", "grey high-light");
+                        //为了防止用户疑惑，不获取最新的点赞数，而是直接加1或减1
+                        $(elem_a).text(parseInt($(elem_a).text()) + 1);
+                    }
+                    else {
+                        $(elem_a).attr("class", "grey");
+                        $(elem_a).text(parseInt($(elem_a).text()) - 1);
+                    }
+                    //点赞图标
+                    $(elem_a).prepend($UPVOTE_ICON)
+                });
+        }
+    </script>
 {% endblock %}
