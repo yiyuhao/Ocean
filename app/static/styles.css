@@ -151,6 +151,18 @@ a.high-light:hover {
     transition-delay: 0.1s;
 }
 
+.effect-avatar-opacity-1 img {
+    -webkit-transition: -webkit-transform 0.5s;
+    transition: transform 0.5s;
+    -webkit-transform: scale3d(0.95, 0.95, 1);
+    transform: scale3d(0.95, 0.95, 1);
+}
+
+.effect-avatar-opacity-1:hover img {
+    -webkit-transform: scale3d(1, 1, 1);
+    transform: scale3d(1, 1, 1);
+}
+
 .position-abs-bottom {
     position: absolute;
     top: 0;

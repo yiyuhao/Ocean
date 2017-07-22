@@ -23,7 +23,7 @@
                             </figure>
                         </div>
                     {% else %}
-                        <figure class="effect-avatar">
+                        <figure class="effect-avatar-opacity-1">
                             <img src="{{ url_for('static', filename="{subpath}/{filename}".format(subpath=current_app.config['USER_AVATAR_SUBPATH'],
                                                                                                   filename=user.user_avatar_hash)) }}"
                                  class="img-rounded center-block" width="140" alt="ddd"/>
