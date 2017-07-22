@@ -15,15 +15,6 @@ class PostModelTestCase(TestCase):
         db.drop_all()
         self.app_context.pop()
 
-    def test_post_upvote(self):
-        post = Post(post_title='文章题目', post_body='这是文章的内容.')
-        db.session.add(post)
-        db.session.commit()
-        self.assertEqual(post.post_upvote, 0)
-        post.post_upvote_increase()
-        db.session.commit()
-        self.assertEqual(post.post_upvote, 1)
-
     def test_post_author(self):
         u = User(user_email='example@example.com', user_password='password')
         p = Post(post_title='文章题目', post_body='这是文章的内容.', user=u)

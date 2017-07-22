@@ -114,12 +114,12 @@ class UserModelTestCase(TestCase):
         p3 = Post(post_title='title', post_body='body')
         db.session.add_all([u1, u2, u3, p1, p2, p3])
         db.session.commit()
-        u1.upvote(p1)
-        u1.upvote(p2)
-        u2.upvote(p2)
-        u2.upvote(p3)
-        u3.upvote(p3)
-        u3.upvote(p1)
+        u1.upvote_or_cancel(p1)
+        u1.upvote_or_cancel(p2)
+        u2.upvote_or_cancel(p2)
+        u2.upvote_or_cancel(p3)
+        u3.upvote_or_cancel(p3)
+        u3.upvote_or_cancel(p1)
         db.session.commit()
 
         # 检查点赞关系正确
@@ -144,9 +144,9 @@ class UserModelTestCase(TestCase):
         self.assertNotIn(u3, p2.upvoters.all())
 
         # 检查取消点赞
-        u1.cancel_upvote(p1)
-        u2.cancel_upvote(p2)
-        u3.cancel_upvote(p3)
+        u1.upvote_or_cancel(p1)
+        u2.upvote_or_cancel(p2)
+        u3.upvote_or_cancel(p3)
         db.session.commit()
 
         self.assertNotIn(p1, u1.upvote_posts.all())

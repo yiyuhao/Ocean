@@ -220,18 +220,6 @@ class User(UserMixin, db.Model):
             except IntegrityError:
                 db.session.rollback()
 
-    # 给文章点赞
-    def upvote(self, post):
-        if not self.is_upvote(post):
-            self.upvote_posts.append(post)
-            db.session.add(self)
-
-    # 取消点赞
-    def cancel_upvote(self, post):
-        if self.is_upvote(post):
-            self.upvote_posts.remove(post)
-            db.session.add(self)
-
     # 点赞或取消
     def upvote_or_cancel(self, post):
         if self.is_upvote(post):
@@ -291,11 +279,6 @@ class Post(db.Model):
 
     def __repr__(self):
         return '<Post {post_id},{post_title}...>'.format(post_id=self.post_id, post_title=self.post_title[:10])
-
-    # 点赞
-    def post_upvote_increase(self):
-        self.post_upvote += 1
-        db.session.add(self)
 
     # 生成虚拟文章数据
     @staticmethod
