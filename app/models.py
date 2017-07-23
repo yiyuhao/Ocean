@@ -60,6 +60,22 @@ class Role(db.Model):
         db.session.commit()
 
 
+class Follow(db.Model):
+    """
+
+        =====================================字段说明=====================================
+        follower_id             主动关注者
+        followed_id             被关注者
+        timestamp               关注时间
+        =====================================字段说明=====================================
+
+    """
+    __tablename__ = 'follows'
+    follower_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), primary_key=True)
+    followed_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class User(UserMixin, db.Model):
     """
 
@@ -88,12 +104,24 @@ class User(UserMixin, db.Model):
     user_member_since = db.Column(db.DateTime(), default=datetime.utcnow)
     user_last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
     user_avatar_hash = db.Column(db.String(128))
+
     role_id = db.Column(db.Integer, db.ForeignKey('roles.role_id'))
     posts = db.relationship('Post', backref='user', lazy='dynamic')
     upvote_posts = db.relationship('Post',
                                    secondary=upvotes,
                                    backref=db.backref('upvoters', lazy='dynamic'),
                                    lazy='dynamic')
+    followed = db.relationship('Follow',
+                               foreign_keys=[Follow.follower_id],
+                               backref=db.backref('follower', lazy='joined'),
+                               lazy='dynamic',
+                               # 启用所有cascade选项，且delete-orphan
+                               cascade='all, delete-orphan')
+    followers = db.relationship('Follow',
+                                foreign_keys=[Follow.followed_id],
+                                backref=db.backref('followed', lazy='joined'),
+                                lazy='dynamic',
+                                cascade='all, delete-orphan')
 
     def __repr__(self):
         return '<User {}>'.format(self.user_name)
@@ -106,6 +134,7 @@ class User(UserMixin, db.Model):
             if self.role is None:
                 self.role = Role.query.filter_by(role_name='User').first()
         self.user_avatar_hash = current_app.config['USER_DEFAULT_AVATAR']
+        self.followed.append(Follow(followed=self))
 
     # 重写UserMixin get_id()
     def get_id(self):
@@ -231,6 +260,23 @@ class User(UserMixin, db.Model):
     # 检查用户是否给某文章点赞
     def is_upvote(self, post):
         return True if self.upvote_posts.filter_by(post_id=post.post_id).first() else False
+
+    # 关注
+    def follow(self, user):
+        if not self.is_following(user):
+            f = Follow(follower=self, followed=user)
+            db.session.add(f)
+
+    def unfollow(self, user):
+        f = self.followed.filter_by(followed_id=user.user_id).first()
+        if f:
+            db.session.delete(f)
+
+    def is_following(self, user):
+        return True if self.followed.filter_by(followed_id=user.user_id).first() else False
+
+    def is_followed_by(self, user):
+        return True if self.followers.filter_by(follower_id=user.user_id).first() else False
 
 
 # 游客权限

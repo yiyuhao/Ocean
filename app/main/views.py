@@ -131,3 +131,35 @@ def upvote():
     post = Post.query.get_or_404(post_id)
     current_user.upvote_or_cancel(post)
     return jsonify(is_current_user_upvoted=current_user.is_upvote(post))
+
+
+@main.route('/follow/<user_name>')
+@login_required
+@permission_required(Permission.FOLLOW)
+def follow(user_name):
+    user = User.query.filter_by(user_name=user_name).first()
+    if user is None:
+        flash('不正确的用户')
+        return redirect(url_for('main.index'))
+    if current_user.is_following(user):
+        flash('你已经关注过了%s' % user.user_name)
+        return redirect(url_for('main.profile', user_name=user_name))
+    current_user.follow(user)
+    flash('已关注%s' % user.user_name)
+    return redirect(url_for('main.profile', user_name=user_name))
+
+
+@main.route('/unfollow/<user_name>')
+@login_required
+@permission_required(Permission.FOLLOW)
+def unfollow(user_name):
+    user = User.query.filter_by(user_name=user_name).first()
+    if user is None:
+        flash('不正确的用户')
+        return redirect(url_for('main.index'))
+    if not current_user.is_following(user):
+        flash('你没有关注过%s' % user.user_name)
+        return redirect(url_for('main.profile', user_name=user_name))
+    current_user.unfollow(user)
+    flash('已取消关注%s' % user.user_name)
+    return redirect(url_for('main.profile', user_name=user_name))

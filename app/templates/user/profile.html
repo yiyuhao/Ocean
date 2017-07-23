@@ -15,7 +15,7 @@
                         <div class="img-mask center-block">
                             <figure class="effect-avatar">
                                 <img src="{{ url_for('static', filename="{subpath}/{filename}".format(subpath=current_app.config['USER_AVATAR_SUBPATH'],
-                                                                                                  filename=user.user_avatar_hash)) }}"
+                                                                                                      filename=user.user_avatar_hash)) }}"
                                      class="img-rounded center-block" width="140" alt="{{ user.user_name }}"/>
                                 <figcaption>
                                     <p>修改头像</p>
@@ -69,8 +69,37 @@
                         编辑个人资料
                     </a>
                 {% endif %}
-                {% if current_user != user %}
-                    <a class="btn btn-block btn-default" type="button">关注</a>
+                {# 显示关注按钮 #}
+                {% if (not current_user.is_anonymous) and current_user != user %}
+                    {# 互相未关注 #}
+                    {% if not current_user.is_following(user) and not user.is_following(current_user) %}
+                        <a class="btn btn-block btn-default" type="button"
+                           href="{{ url_for('main.follow', user_name=user.user_name) }}"
+                           onmouseenter="showFollow(this)" onmouseleave="reset_to_unfollow(this)">
+                            关注
+                        </a>
+                    {# cur_user关注了user #}
+                    {% elif current_user.is_following(user) and not user.is_following(current_user) %}
+                        <a class="btn btn-block btn-default" type="button"
+                           href="{{ url_for('main.unfollow', user_name=user.user_name) }}"
+                           onmouseenter="showUnfollow(this)" onmouseleave="reset_to_following(this)">
+                            已关注
+                        </a>
+                    {# user关注了cur_user #}
+                    {% elif user.is_following(current_user) and not current_user.is_following(user) %}
+                        <a class="btn btn-block btn-default" type="button"
+                           href="{{ url_for('main.follow', user_name=user.user_name) }}"
+                           onmouseenter="showFollow(this)" onmouseleave="reset_to_followed(this)">
+                            关注了你
+                        </a>
+                    {# 互相关注 #}
+                    {% elif current_user.is_following(user) and user.is_following(current_user) %}
+                        <a class="btn btn-block btn-default" type="button"
+                           href="{{ url_for('main.unfollow', user_name=user.user_name) }}"
+                           onmouseenter="showUnfollow(this)" onmouseleave="reset_to_follow_each_other(this)">
+                            互相关注
+                        </a>
+                    {% endif %}
                 {% endif %}
             </div>
         </div>
@@ -99,6 +128,32 @@
             $('.img-mask').click(function () {
                 $('#upload-file').trigger('click');
             })
-        })
+        });
+
+        //onmouseenter改变关注按钮
+        function showFollow(elem_a) {
+            $(elem_a).text('关注');
+        }
+
+        function showUnfollow(elem_a) {
+            $(elem_a).text('取消关注');
+        }
+
+        //onmouseleava恢复关注按钮
+        function reset_to_unfollow(elem_a) {
+            $(elem_a).text('关注');
+        }
+
+        function reset_to_following(elem_a) {
+            $(elem_a).text('已关注');
+        }
+
+        function reset_to_followed(elem_a) {
+            $(elem_a).text('关注了你');
+        }
+
+        function reset_to_follow_each_other(elem_a) {
+            $(elem_a).text('互相关注');
+        }
     </script>
 {% endblock %}
