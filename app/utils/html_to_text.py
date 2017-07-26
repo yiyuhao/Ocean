@@ -16,7 +16,7 @@ class OceanHTMLParser(HTMLParser):
     def handle_data(self, data):
         text = data.strip()
         if len(text) > 0:
-            text = sub('[ \t\r\n]+', '', text)
+            text = sub('[ \t\r\n]+', ' ', text)
             self.__text.append(text + '')
 
     def handle_starttag(self, tag, attrs):
