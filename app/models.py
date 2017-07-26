@@ -278,6 +278,11 @@ class User(UserMixin, db.Model):
     def is_followed_by(self, user):
         return True if self.followers.filter_by(follower_id=user.user_id).first() else False
 
+    # 获取所关注用户的文章
+    @property
+    def followed_posts(self):
+        return Post.query.join(Follow, Follow.followed_id == Post.user_id).filter(Follow.follower_id == self.user_id)
+
 
 # 游客权限
 class AnonymousUser(AnonymousUserMixin):

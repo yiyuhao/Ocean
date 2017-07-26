@@ -3,8 +3,24 @@ from .forms import EditProfileForm, EditProfileAdminForm, PostForm, EditPostForm
 from ..models import User, Role, Post, Permission
 from app import db
 from app.decorators import admin_required, permission_required
-from flask import render_template, abort, request, redirect, url_for, flash, current_app, jsonify
+from flask import render_template, abort, request, redirect, url_for, flash, current_app, jsonify, make_response
 from flask_login import current_user, login_required
+
+
+@main.route('/all')
+@login_required
+def show_all():
+    resp = make_response(redirect(url_for('main.index')))
+    resp.set_cookie('show_followed', '', max_age=30*24*60*60)
+    return resp
+
+
+@main.route('/followed')
+@login_required
+def show_followed():
+    resp = make_response(redirect(url_for('main.index')))
+    resp.set_cookie('show_followed', '1', max_age=30*24*60*60)
+    return resp
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -19,13 +35,19 @@ def index():
         return redirect(url_for('main.index'))
     # 获取文章列表
     page = request.args.get('page', 1, type=int)
-    pagination = Post.query.order_by(Post.post_create_time.desc()).paginate(
+    # cookie中获取show_followed以显示全部文章或关注用户的文章
+    show_followed = False
+    if current_user.is_authenticated:
+        show_followed = bool(request.cookies.get('show_followed', ''))
+    query = current_user.followed_posts if show_followed else Post.query
+    pagination = query.order_by(Post.post_create_time.desc()).paginate(
         page=page,
         per_page=current_app.config['OCEAN_POSTS_PER_PAGE'],
         error_out=False
     )
     posts = pagination.items
-    return render_template('index.html', post_form=post_form, posts=posts, pagination=pagination)
+    return render_template('index.html', post_form=post_form, posts=posts, pagination=pagination,
+                           show_followed=show_followed)
 
 
 @main.route('/user/<user_name>', methods=['GET', 'POST'])
