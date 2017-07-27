@@ -133,7 +133,7 @@
             {% endfor %}
 
             {# 分页插件 #}
-            {% if pagination and pagination != -1 %}
+            {% if pagination.has_prev or pagination.has_next %}
                 <li class="comment">
                     {{ macros.pagination_widget(pagination, 'main.post', fragment='#comments', post_id=post.post_id) }}
                 </li>
