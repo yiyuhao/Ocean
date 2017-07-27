@@ -235,6 +235,11 @@ li.box-shadow:hover div.post-header-edit-post {
     opacity: 1;
 }
 
+li.comment:hover div.post-header-edit-post {
+    visibility: visible;
+    opacity: 1;
+}
+
 div.post-title h3 {
     margin: 10px 0;
     font-size: 22px;
@@ -296,4 +301,9 @@ p.post-body-content {
 p.post-body-content-show-all {
     word-wrap: break-word;
     word-break: normal;
+}
+
+/*comment*/
+li.comment {
+    padding: 10px 20px;
 }

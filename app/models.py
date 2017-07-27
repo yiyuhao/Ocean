@@ -107,6 +107,7 @@ class User(UserMixin, db.Model):
 
     role_id = db.Column(db.Integer, db.ForeignKey('roles.role_id'))
     posts = db.relationship('Post', backref='user', lazy='dynamic')
+    comments = db.relationship('Comment', backref='user', lazy='dynamic')
     upvote_posts = db.relationship('Post',
                                    secondary=upvotes,
                                    backref=db.backref('upvoters', lazy='dynamic'),
@@ -327,6 +328,7 @@ class Post(db.Model):
     post_body_text = db.Column(db.Text)
     post_create_time = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
+    comments = db.relationship('Comment', backref='post', lazy='dynamic')
 
     def __repr__(self):
         return '<Post {post_id},{post_title}...>'.format(post_id=self.post_id, post_title=self.post_title[:10])
@@ -365,3 +367,23 @@ class Post(db.Model):
 
 
 db.event.listen(Post.post_body_html, 'set', Post.on_changed_body)
+
+
+class Comment(db.Model):
+    """
+
+        =====================================字段说明=====================================
+        comment_body             评论主题
+        comment_timestamp        时间戳
+        comment_disabled         遮盖
+        =====================================字段说明=====================================
+
+    """
+    __tablename__ = 'comments'
+
+    comment_id = db.Column(db.Integer, primary_key=True)
+    comment_body = db.Column(db.Text, nullable=False)
+    comment_create_time = db.Column(db.DateTime, default=datetime.utcnow)
+    comment_disabled = db.Column(db.Boolean)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.post_id'))

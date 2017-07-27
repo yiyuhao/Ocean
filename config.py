@@ -28,6 +28,7 @@ class Config:
 
     # 文章分页
     OCEAN_POSTS_PER_PAGE = 20
+    OCEAN_COMMENTS_PER_PAGE = 20
 
 
 class DevelopmentConfig(Config):

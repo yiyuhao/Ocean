@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "macros/_macro_pagination_widget.html" as macros %}
 
 {% block title %}
     Ocean - {{ post.post_title }} - 分享你沉浸的世界
@@ -78,6 +80,64 @@
                 </div>
 
             </li>
+        </ul>
+
+        {# 评论栏及分页 #}
+        <ul class="posts box-shadow">
+            <li class="comment">
+                {{ wtf.quick_form(form) }}
+            </li>
+            {% for comment in comments %}
+                <li class="comment">
+                    <div class="post-header">
+                        <div class="post-header-author">
+                            {# 头像 #}
+                            <a class="grey" href="{{ url_for('main.profile', user_name=comment.user.user_name) }}">
+                                <img src="{{ url_for('static', filename="{subpath}/{filename}".format(subpath=current_app.config['USER_AVATAR_SUBPATH'],
+                                                                                       filename=comment.user.user_avatar_hash)) }}"
+                                     width="16" alt="{{ current_user.user_name }}"
+                                     class="img-rounded">
+                            </a>
+                            {# 昵称 #}
+                            <a class="grey" href="{{ url_for('main.profile', user_name=comment.user.user_name) }}">
+                                {{ comment.user.user_name }}
+                            </a>
+                            {# 简介 #}
+                            {% if comment.user.user_about_me %}
+                                <span>，{{ comment.user.user_about_me }}</span>
+                            {% endif %}
+                        </div>
+                        {# 修改时间 #}
+                        <div class="post-header-timestamp">{{ moment(comment.comment_create_time).fromNow(refresh=True) }}</div>
+                        {# 禁用按钮 #}
+                        {% if current_user.can(Permission.MANAGE_COMMENTS) %}
+                            <div class="post-header-edit-post">
+                                <a class="grey" href="#">[Admin]遮盖或恢复评论</a>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# 评论主体 #}
+                    <div class="post-body-show-all">
+                        {% if comment.comment_disabled == True %}
+                            <p class="post-body-content-show-all"><strong>该评论被遮盖</strong></p>
+                            {# 协管员还要显示评论 #}
+                            {% if current_user.can(Permission.MANAGE_COMMENTS) %}
+                                <p class="post-body-content-show-all">{{ comment.comment_body }}</p>
+                            {% endif %}
+                        {% else %}
+                            <p class="post-body-content-show-all">{{ comment.comment_body }}</p>
+                        {% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+
+            {# 分页插件 #}
+            {% if pagination and pagination != -1 %}
+                <li class="comment">
+                    {{ macros.pagination_widget(pagination, 'main.post', fragment='#comments', post_id=post.post_id) }}
+                </li>
+            {% endif %}
         </ul>
     </div>
 {% endblock %}

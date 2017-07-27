@@ -48,3 +48,8 @@ class EditPostForm(FlaskForm):
     post_title = StringField('题目', validators=[DataRequired()])
     post_body = TextAreaField('内容', validators=[DataRequired()])
     submit = SubmitField('修改')
+
+
+class CommentForm(FlaskForm):
+    comment_body = TextAreaField('', validators=[DataRequired()])
+    submit = SubmitField('评论')

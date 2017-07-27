@@ -1,6 +1,6 @@
 from . import main
-from .forms import EditProfileForm, EditProfileAdminForm, PostForm, EditPostForm
-from ..models import User, Role, Post, Permission
+from .forms import EditProfileForm, EditProfileAdminForm, PostForm, EditPostForm, CommentForm
+from ..models import User, Role, Post, Permission, Comment
 from app import db
 from app.decorators import admin_required, permission_required
 from flask import render_template, abort, request, redirect, url_for, flash, current_app, jsonify, make_response
@@ -117,10 +117,27 @@ def edit_profile_admin(uid):
     return render_template('user/edit_profile_admin.html', form=form, user=user)
 
 
-@main.route('/article/<int:post_id>')
+@main.route('/article/<int:post_id>', methods=['GET', 'POST'])
 def post(post_id):
     post = Post.query.get_or_404(post_id)
-    return render_template('post/post.html', post=post)
+    form = CommentForm()
+    if form.validate_on_submit():
+        comment = Comment(comment_body=form.comment_body.data,
+                          post=post,
+                          user=current_user._get_current_object())
+        db.session.add(comment)
+        flash('评论已发布')
+        return redirect(url_for('main.post', post_id=post_id, page=-1))
+
+    page = request.args.get('page', 1, type=int)
+    per_page = current_app.config['OCEAN_COMMENTS_PER_PAGE']
+    if page == -1:
+        page = (post.comments.count() - 1) // per_page + 1
+    pagination = post.comments.order_by(Comment.comment_create_time.asc()).paginate(page=page,
+                                                                                    per_page=per_page,
+                                                                                    error_out=False)
+    comments = pagination.items
+    return render_template('post/post.html', post=post, form=form, comments=comments, pagination=pagination)
 
 
 @main.route('/edit-article/<int:post_id>', methods=['GET', 'POST'])
