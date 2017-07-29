@@ -345,7 +345,6 @@ class Post(db.Model):
             u = User.query.offset(randint(0, user_count - 1)).first()
             p = Post(post_title=forgery_py.lorem_ipsum.title(),
                      post_body=forgery_py.lorem_ipsum.sentences(randint(1, 50)),
-                     post_upvote=randint(0, 10000),
                      post_create_time=forgery_py.date.datetime(past=True),
                      user=u)
             db.session.add(p)
@@ -387,3 +386,21 @@ class Comment(db.Model):
     comment_disabled = db.Column(db.Boolean)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.post_id'))
+
+    @staticmethod
+    def generate_fake(count=10000):
+        from random import seed, randint
+        import forgery_py
+
+        seed()
+        user_count = User.query.count()
+        post_count = Post.query.count()
+        for i in range(count):
+            u = User.query.offset(randint(0, user_count-1)).first()
+            p = Post.query.offset(randint(0, post_count-1)).first()
+            c = Comment(comment_body=forgery_py.lorem_ipsum.sentences(randint(1, 5)),
+                        user=u,
+                        post=p)
+            db.session.add(c)
+            db.session.commit()
+

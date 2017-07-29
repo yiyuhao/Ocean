@@ -1,5 +1,5 @@
 from app import create_app, db
-from app.models import User, Role, Post
+from app.models import User, Role, Post, Comment
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand
 import os
@@ -11,7 +11,7 @@ migrate = Migrate(app, db)
 
 
 def make_shell_context():
-    return dict(app=app, db=db, User=User, Role=Role, Post=Post)
+    return dict(app=app, db=db, User=User, Role=Role, Post=Post, Comment=Comment)
 manager.add_command('shell', Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
 
@@ -22,6 +22,16 @@ def test():
     import unittest
     tests = unittest.TestLoader().discover('tests')
     unittest.TextTestRunner(verbosity=2).run(tests)
+
+
+@manager.command
+def initdb():
+    """"""
+    Role.insert_roles()
+    User.generate_fake()
+    Post.generate_fake()
+    Comment.generate_fake()
+
 
 if __name__ == '__main__':
     manager.run()

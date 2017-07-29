@@ -74,8 +74,8 @@
                         </a>
                     {% endif %}
                     &nbsp;&nbsp;&nbsp;&nbsp;
-                    <a class="grey" href="#">
-                        <span class="glyphicon glyphicon-comment"></span>33条评论
+                    <a class="grey" href="{{ url_for('main.post', post_id=post.post_id) }}#comments">
+                        <span class="glyphicon glyphicon-comment"></span>{{ post.comments.count() }}条评论
                     </a>
                 </div>
 
@@ -84,11 +84,11 @@
 
         {# 评论栏及分页 #}
         <ul class="posts box-shadow">
-            <li class="comment">
+            <li class="comments" id="comments">
                 {{ wtf.quick_form(form) }}
             </li>
             {% for comment in comments %}
-                <li class="comment">
+                <li class="comments" id="{{ comment.comment_id }}">
                     <div class="post-header">
                         <div class="post-header-author">
                             {# 头像 #}
@@ -112,20 +112,32 @@
                         {# 禁用按钮 #}
                         {% if current_user.can(Permission.MANAGE_COMMENTS) %}
                             <div class="post-header-edit-post">
-                                <a class="grey" href="#">[Admin]遮盖或恢复评论</a>
+                                {% if not comment.comment_disabled %}
+                                    <a class="grey" href="javascript:void(0);"
+                                       onclick="change_comment_enable({{ comment.comment_id }}, 'disabled', this)">
+                                        [Admin]遮盖评论
+                                    </a>
+                                {% else %}
+                                    <a class="grey" href="javascript:void(0);"
+                                       onclick="change_comment_enable({{ comment.comment_id }}, 'enabled', this)">
+                                        [Admin]取消遮盖
+                                    </a>
+                                {% endif %}
                             </div>
                         {% endif %}
                     </div>
 
                     {# 评论主体 #}
                     <div class="post-body-show-all">
-                        {% if comment.comment_disabled == True %}
-                            <p class="post-body-content-show-all"><strong>该评论被遮盖</strong></p>
-                            {# 协管员还要显示评论 #}
-                            {% if current_user.can(Permission.MANAGE_COMMENTS) %}
-                                <p class="post-body-content-show-all">{{ comment.comment_body }}</p>
-                            {% endif %}
-                        {% else %}
+                        {% if comment.comment_disabled %}
+                            <p class="post-body-content-show-all text-center">
+                                <br/>
+                                <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+                                该评论被遮盖
+                            </p>
+                        {% endif %}
+                        {# 协管员还要显示评论 #}
+                        {% if current_user.can(Permission.MANAGE_COMMENTS) or not comment.comment_disabled %}
                             <p class="post-body-content-show-all">{{ comment.comment_body }}</p>
                         {% endif %}
                     </div>
@@ -134,7 +146,7 @@
 
             {# 分页插件 #}
             {% if pagination.has_prev or pagination.has_next %}
-                <li class="comment">
+                <li class="comments">
                     {{ macros.pagination_widget(pagination, 'main.post', fragment='#comments', post_id=post.post_id) }}
                 </li>
             {% endif %}
@@ -167,6 +179,7 @@
 
         $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
         $UPVOTE_ICON = '<span class="glyphicon glyphicon-triangle-top"></span>';
+
         function ajax_upvote(post_id, elem_a) {
             $.getJSON($SCRIPT_ROOT + '/upvote',
                 {post_id: post_id},
@@ -183,6 +196,51 @@
                     //点赞图标
                     $(elem_a).prepend($UPVOTE_ICON)
                 });
+        }
+
+        $COMMENT_MASK = '<p class="post-body-content-show-all text-center">' +
+            '<br/>' +
+            '<span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>' +
+            '该评论被遮盖' +
+            '</p>';
+
+        function change_comment_enable(comment_id, enable_status, elem_moderate_button) {
+            $.getJSON($SCRIPT_ROOT + '/moderate-comment',
+                {
+                    comment_id: comment_id,
+                    enable_status: enable_status
+                },
+                function (data) {
+                    //data: e.g.
+                    //{'comment_disabled': true, 'comment_body': 'blablabla'}
+
+                    // 切换遮盖或取消遮盖的按钮
+                    if (data.comment_disabled == true) {
+                        $(elem_moderate_button).attr('onclick', "change_comment_enable(" + comment_id + ", 'enabled', this)");
+                        $(elem_moderate_button).text('[Admin]取消遮盖');
+                    } else {
+                        $(elem_moderate_button).attr('onclick', "change_comment_enable(" + comment_id + ", 'disabled', this)");
+                        $(elem_moderate_button).text('[Admin]遮盖评论');
+                    }
+
+                    // 找到comment对象并清空子元素
+                    var comment_div = $("#" + comment_id).children("div.post-body-show-all");
+                    comment_div.empty();
+                    // disabled则显示被遮盖
+                    if (data.comment_disabled == true) {
+                        comment_div.html($COMMENT_MASK);
+                    }
+                    // 如果当前用户是moderator或者评论没有被遮盖，则显示评论内容
+                    $COMMENT_BODY = '<p class="post-body-content-show-all">' + data.comment_body + '</p>';
+                    {% if current_user.can(Permission.MANAGE_COMMENTS) %}
+                        comment_div.append($COMMENT_BODY);
+                    {% else %}
+                        if (data.comment_disabled == false) {
+                            comment_div.append($COMMENT_BODY);
+                        }
+                    {% endif %}
+                }
+            )
         }
     </script>
 {% endblock %}

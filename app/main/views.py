@@ -172,6 +172,33 @@ def upvote():
     return jsonify(is_current_user_upvoted=current_user.is_upvote(post))
 
 
+@main.route('/moderate-comment')
+@login_required
+@permission_required(Permission.MANAGE_COMMENTS)
+def change_comment_enable():
+    """
+        ajax请求, 处理评论的遮盖或取消遮盖功能
+    :argument
+            e.g
+            {'comment_id': 390930432,
+             'enable_status': 'disabled'}   or 'enabled'
+    :return:(json response)
+            e.g.
+            {'comment_disabled': true,      该文章是否被遮盖
+             'comment_body': 'banana'}      评论内容，被遮盖则返回''
+    """
+
+    comment_id = request.args.get('comment_id')
+    enable_status = request.args.get('enable_status')
+    comment_disabled = True if enable_status == 'disabled' else False
+
+    comment = Comment.query.get_or_404(comment_id)
+    comment.comment_disabled = comment_disabled
+    db.session.add(comment)
+    return jsonify(comment_disabled=comment_disabled,
+                   comment_body=comment.comment_body)
+
+
 @main.route('/follow/<user_name>')
 @login_required
 @permission_required(Permission.FOLLOW)

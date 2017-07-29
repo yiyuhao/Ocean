@@ -76,8 +76,8 @@
                     </a>
                 {% endif %}
                 &nbsp;&nbsp;&nbsp;&nbsp;
-                <a class="grey" href="#">
-                    <span class="glyphicon glyphicon-comment"></span>33条评论
+                <a class="grey" href="{{ url_for('main.post', post_id=post.post_id) }}#comments">
+                    <span class="glyphicon glyphicon-comment"></span>{{ post.comments.count() }}条评论
                 </a>
             </div>
 

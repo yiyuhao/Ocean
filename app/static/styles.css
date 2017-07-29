@@ -235,7 +235,7 @@ li.box-shadow:hover div.post-header-edit-post {
     opacity: 1;
 }
 
-li.comment:hover div.post-header-edit-post {
+li.comments:hover div.post-header-edit-post {
     visibility: visible;
     opacity: 1;
 }
@@ -304,6 +304,6 @@ p.post-body-content-show-all {
 }
 
 /*comment*/
-li.comment {
+li.comments {
     padding: 10px 20px;
 }
