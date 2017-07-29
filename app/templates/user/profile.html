@@ -101,6 +101,9 @@
                         </a>
                     {% endif %}
                 {% endif %}
+                {# 显示关注人数 #}
+                <a class="grey" href="#">关注: {{ user.followed.count() }}</a>
+                <a class="grey" href="#">粉丝: {{ user.followers.count() }}</a>
             </div>
         </div>
     </div>
