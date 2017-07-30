@@ -32,7 +32,7 @@ class RegistrationForm(FlaskForm):
 
 class ChangeEmailForm(FlaskForm):
     new_user_email = StringField('新邮箱', validators=[Length(1, 64), DataRequired(), Email()])
-    submit_email = SubmitField('保存', render_kw={'style': 'width: 100%'})
+    submit_email = SubmitField('保存')
 
     def validate_new_user_email(self, field):
         if User.query.filter_by(user_email=field.data).first():
@@ -58,7 +58,7 @@ class ChangePasswordForm(FlaskForm):
     new_password_repeat = PasswordField('再次确认新密码', validators=[DataRequired(),
                                                                Length(4, 64),
                                                                EqualTo('new_password', '两次输入必须一致')])
-    submit_password = SubmitField('保存', render_kw={'style': 'width: 100%'})
+    submit_password = SubmitField('保存')
 
     def __init__(self, user, *args, **kwargs):
         super(ChangePasswordForm, self).__init__(*args, **kwargs)

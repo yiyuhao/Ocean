@@ -158,8 +158,9 @@ def account():
             current_user.user_password = password_form.new_password.data
             db.session.add(current_user)
             flash('密码已更改，请重新登录')
+            user_email = current_user.user_email
             logout_user()
-            return redirect(url_for('main.index'))
+            return redirect(url_for('auth.login', user_email=user_email))
 
     return render_template('user/account.html',
                            user=current_user,
