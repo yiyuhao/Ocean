@@ -63,16 +63,13 @@ class XssHtmlParser(HTMLParser):
         self.allow_tags = allows if allows else self.allow_tags
         self.result = []
         self.start = []
-        self.data = []
 
     @property
     def clean_html(self):
         """
         Get the safe html code
         """
-        for i in range(0, len(self.result)):
-            self.data.append(self.result[i])
-        return ''.join(self.data)
+        return ''.join(self.result)
 
     def handle_startendtag(self, tag, attrs):
         self.handle_starttag(tag, attrs)
