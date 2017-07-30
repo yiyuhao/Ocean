@@ -47,7 +47,7 @@
                     {% if user.user_location %}
                         {{ user.user_location }}&nbsp;&nbsp;
                     {% endif %}
-                    上次登录：{{ moment(user.user_last_seen).fromNow(refresh=True) }}
+                    最近登录：{{ moment(user.user_last_seen).fromNow(refresh=True) }}
                 </p>
                 <p class="text-left lead">
                     {% if user.user_about_me %}
@@ -58,7 +58,7 @@
                 </p>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-2 text-center">
                 {% if current_user.is_administrator %}
                     <a class="btn btn-block btn-danger"
                        href='{{ url_for('main.edit_profile_admin', uid=user.user_id) }}'>
@@ -102,8 +102,8 @@
                     {% endif %}
                 {% endif %}
                 {# 显示关注人数 #}
-                <a class="grey" href="#">关注: {{ user.followed.count() }}</a>
-                <a class="grey" href="#">粉丝: {{ user.followers.count() }}</a>
+                <small>关注: {{ user.followed.count() - 1 }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</small>
+                <small>粉丝: {{ user.followers.count() - 1 }}</small>
             </div>
         </div>
     </div>
