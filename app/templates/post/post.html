@@ -84,9 +84,11 @@
 
         {# 评论栏及分页 #}
         <ul class="posts box-shadow">
-            <li class="comments" id="comments">
-                {{ wtf.quick_form(form) }}
-            </li>
+            {% if not current_user.is_anonymous %}
+                <li class="comments" id="comments">
+                    {{ wtf.quick_form(form) }}
+                </li>
+            {% endif %}
             {% for comment in comments %}
                 <li class="comments" id="{{ comment.comment_id }}">
                     <div class="post-header">

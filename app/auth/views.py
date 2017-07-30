@@ -1,10 +1,12 @@
-from flask import render_template, url_for, flash, redirect, request
+from flask import render_template, url_for, flash, redirect, request, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from ..models import User
-from .forms import RegistrationForm, LoginForm, ChangeEmailForm, ChangePasswordForm
+from .forms import RegistrationForm, LoginForm, ChangeEmailForm, ChangePasswordForm, GetBackPasswordForm, \
+    PasswordResetForm
 from . import auth
 from app import db
 from app.email import send_email
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 
 @auth.before_app_request
@@ -13,7 +15,6 @@ def filter_unconfirmed_user():
             and not current_user.user_confirmed \
             and 'auth.' not in request.endpoint \
             and 'static' != request.endpoint:
-
         return redirect(url_for('auth.unconfirmed'))
 
 
@@ -33,6 +34,10 @@ def login():
             # 未登录的用户被login-manager重定向到登陆时，会保存当前地址。用于恢复访问页面
             return redirect(request.args.get('next') or url_for('main.index'))
         flash('邮箱或密码错误')
+    # 用户重设密码进行登陆后，帮助用户填写email
+    user_email = request.args.get('user_email')
+    if user_email:
+        form.user_email.data = user_email
     return render_template('auth/login.html', form=form)
 
 
@@ -64,6 +69,45 @@ def register():
     return render_template("auth/register.html", form=form)
 
 
+@auth.route('/reset', methods=['GET', 'POST'])
+def password_reset_request():
+    if not current_user.is_anonymous:
+        return redirect(url_for('main.index'))
+    form = GetBackPasswordForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(user_email=form.user_email.data).first()
+        if user:
+            token = user.generate_confirmation_token()
+            send_email(to=user.user_email, subject='重置密码', template='auth/email/get_back_password',
+                       user=user, token=token)
+        flash('一封确认邮件已发往你的账户：{email}。请前往邮箱确认'.format(email=form.user_email.data))
+        return redirect(url_for('auth.login'))
+    return render_template('auth/get_back_password.html', form=form)
+
+
+@auth.route('/reset/<token>', methods=['GET', 'POST'])
+def password_reset(token):
+    s = Serializer(current_app.config['SECRET_KEY'])
+    try:
+        data = s.loads(token)
+    except:
+        flash('链接已过期，请重新填写邮箱进行密码找回')
+        return redirect(url_for('auth.password_reset_request'))
+    user = User.query.get_or_404(data['user_id'])
+    form = PasswordResetForm()
+    if form.validate_on_submit():
+        new_password = form.new_password.data
+        # 若与旧密码相同，将用户踢到登陆页面
+        if user.verify_password(new_password):
+            flash('你这什么操作...这就是你的旧密码啊，登陆吧...')
+            return redirect(url_for('auth.login', user_email=user.user_email))
+        user.user_password = form.new_password.data
+        db.session.add(user)
+        flash('密码已修改成功，请重新登陆')
+        return redirect(url_for('auth.login', user_email=user.user_email))
+    return render_template('auth/reset_password.html', form=form)
+
+
 @auth.route('/confirm/<token>')
 @login_required
 def confirm(token):
@@ -87,7 +131,8 @@ def unconfirmed():
 @login_required
 def resend_confirmation():
     token = current_user.generate_confirmation_token()
-    send_email(to=current_user.user_email, subject='确认你的账号', template='auth/email/confirm', user=current_user, token=token)
+    send_email(to=current_user.user_email, subject='确认你的账号', template='auth/email/confirm', user=current_user,
+               token=token)
     flash('新的一封确认邮件已发往<{user_email}>，请前往邮箱确认。'.format(user_email=current_user.user_email))
     return redirect(url_for('main.index'))
 

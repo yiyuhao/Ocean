@@ -179,7 +179,7 @@ class User(UserMixin, db.Model):
         self.user_avatar_hash = filename_hash
         db.session.add(self)
 
-    # 注册确认token
+    # 注册确认token 及重置密码token
     def generate_confirmation_token(self, expiration=3600):
         s = Serializer(current_app.config['SECRET_KEY'], expires_in=expiration)
         return s.dumps({'user_id': self.user_id})
