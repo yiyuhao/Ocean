@@ -2,10 +2,11 @@ from . import db
 from . import login_manager
 from . import photo_upload
 from .utils.file_processing import hash_filename, rsize
+from app.exceptions import ValidationError
 from app.utils.html_to_text import html_to_text
 from app.utils.xss_filter import html_clean
 from datetime import datetime
-from flask import current_app
+from flask import current_app, url_for
 from flask_login import UserMixin, AnonymousUserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -284,6 +285,34 @@ class User(UserMixin, db.Model):
     def followed_posts(self):
         return Post.query.join(Follow, Follow.followed_id == Post.user_id).filter(Follow.follower_id == self.user_id)
 
+    # 生成登陆令牌
+    def generate_auth_token(self, expiration):
+        s = Serializer(current_app.config['SECRET_KEY'], expires_in=expiration)
+        return s.dumps({'user_id': self.user_id}).decode('ascii')
+
+    # 验证登陆令牌
+    @staticmethod
+    def verify_auth_token(token):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except:
+            return None
+        return User.query.get(data['user_id'])
+
+    # 转为json资源
+    def to_json(self):
+        json_user = {
+            'url': url_for('api.get_user', user_id=self.user_id, _external=True),
+            'user_name': self.user_name,
+            'user_member_since': self.user_member_since,
+            'user_last_seen': self.user_last_seen,
+            'posts': url_for('api.get_user_posts', user_id=self.user_id, _external=True),
+            'followed_posts': url_for('api.get_user_posts', user_id=self.user_id, _external=True),
+            'post_count': self.posts.count()
+        }
+        return json_user
+
 
 # 游客权限
 class AnonymousUser(AnonymousUserMixin):
@@ -364,6 +393,29 @@ class Post(db.Model):
     def on_changed_body(target, value, oldvalue, initiator):
         target.post_body_text = html_to_text(markup=value)
 
+    def to_json(self):
+        json_post = {
+            'url': url_for('api.get_posts', post_id=self.post_id, _external=True),
+            'post_body_html': self.post_body_html,
+            'post_body_text': self.post_body_text,
+            'post_create_time': self.post_create_time,
+            'user_id': url_for('api.get_user', user_id=self.user_id, _external=True),
+            'comments': url_for('api.get_comments', post_id=self.post_id, _external=True),
+            'comments_count': self.comments.count()
+        }
+        return json_post
+
+    @staticmethod
+    def from_json(json_post):
+        post_title = json_post.get('post_title')
+        post_body = json_post.get('post_body')
+        if post_title is None or post_title == '':
+            raise ValidationError('post does not have a title')
+        if post_body is None or post_body == '':
+            raise ValidationError('post does not have a body')
+        return Post(post_title=post_title,
+                    post_body=post_body)
+
 
 db.event.listen(Post.post_body_html, 'set', Post.on_changed_body)
 
@@ -404,3 +456,20 @@ class Comment(db.Model):
             db.session.add(c)
             db.session.commit()
 
+    def to_json(self):
+        json_comment = {
+            'url': url_for('api.get_comment', comment_id=self.comment_id, _external=True),
+            'comment_body': self.comment_body,
+            'comment_create_time': self.comment_create_time,
+            'comment_disabled': self.comment_disabled,
+            'post': url_for('api.get_posts', post_id=self.post_id, _external=True),
+            'user': url_for('api.get_user', user_id=self.user_id, _external=True)
+        }
+        return json_comment
+
+    @staticmethod
+    def from_json(json_comment):
+        comment_body = json_comment.get('comment_body')
+        if comment_body is None or comment_body == '':
+            raise ValidationError('comment does not have a body')
+        return Comment(comment_body=comment_body)
