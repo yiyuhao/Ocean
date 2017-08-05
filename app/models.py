@@ -135,7 +135,7 @@ class User(UserMixin, db.Model):
                 self.role = Role.query.filter_by(role_name='Administrator').first()
             if self.role is None:
                 self.role = Role.query.filter_by(role_name='User').first()
-        self.user_avatar_hash = current_app.config['USER_DEFAULT_AVATAR']
+        self.user_avatar_hash = '{initials}.jpg'.format(initials=self.user_name[0].upper())
         self.followed.append(Follow(followed=self))
 
     # 重写UserMixin get_id()
@@ -164,8 +164,8 @@ class User(UserMixin, db.Model):
         # 创建文件uuid
         filename_hash = hash_filename(user_avatar.filename)
         abs_filename_hash = os.path.join(current_app.config['USER_AVATAR_PATH'], filename_hash)
-        # 删除旧文件
-        if current_app.config['USER_DEFAULT_AVATAR'] != self.user_avatar_hash:
+        # 删除旧头像文件(如果是默认头像则不作处理)
+        if len(self.user_avatar_hash) > 10:
             os.remove(os.path.join(current_app.config['USER_AVATAR_PATH'],
                                    self.user_avatar_hash))
         # 保存原图
@@ -250,6 +250,14 @@ class User(UserMixin, db.Model):
                 db.session.commit()
             except IntegrityError:
                 db.session.rollback()
+
+    # 更新所有用户头像为默认头像
+    @staticmethod
+    def reset_avatar():
+        for user in User.query.all():
+            user.user_avatar_hash = '{initials}.jpg'.format(initials=user.user_name[0].upper())
+            db.session.add(user)
+        db.session.commit()
 
     # 点赞或取消
     def upvote_or_cancel(self, post):

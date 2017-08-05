@@ -25,7 +25,6 @@ class Config:
     STATIC_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'app', 'static')
     USER_AVATAR_PATH = os.path.join(STATIC_PATH, 'avatar')
     USER_AVATAR_SUBPATH = 'avatar'
-    USER_DEFAULT_AVATAR = 'user_default_avatar.png'
 
     # 文章分页
     OCEAN_POSTS_PER_PAGE = 20
