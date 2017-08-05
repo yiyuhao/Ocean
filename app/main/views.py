@@ -5,13 +5,24 @@ from app import db
 from app.decorators import admin_required, permission_required
 from flask import render_template, abort, request, redirect, url_for, flash, current_app, jsonify, make_response
 from flask_login import current_user, login_required
+from flask_sqlalchemy import get_debug_queries
+
+
+@main.after_app_request
+def after_request(response):
+    for query in get_debug_queries():
+        if query.duration >= current_app.config['OCEAN_SLOW_DB_QUERY_TIME']:
+            current_app.logger.warning(
+                'Slow query: {statement}\nParameters: {param}\nDuration: {duration}\nContext: {context}\n'.format(
+                    statement=query.statement, param=query.parameters, duration=query.duration, context=query.context))
+    return response
 
 
 @main.route('/all')
 @login_required
 def show_all():
     resp = make_response(redirect(url_for('main.index')))
-    resp.set_cookie('show_followed', '', max_age=30*24*60*60)
+    resp.set_cookie('show_followed', '', max_age=30 * 24 * 60 * 60)
     return resp
 
 
@@ -19,7 +30,7 @@ def show_all():
 @login_required
 def show_followed():
     resp = make_response(redirect(url_for('main.index')))
-    resp.set_cookie('show_followed', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_followed', '1', max_age=30 * 24 * 60 * 60)
     return resp
 
 

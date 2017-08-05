@@ -280,6 +280,14 @@ class User(UserMixin, db.Model):
     def is_followed_by(self, user):
         return True if self.followers.filter_by(follower_id=user.user_id).first() else False
 
+    @staticmethod
+    def add_self_follows():
+        for user in User.query.all():
+            if not user.is_following(user):
+                user.follow(user)
+                db.session.add(user)
+                db.session.commit()
+
     # 获取所关注用户的文章
     @property
     def followed_posts(self):

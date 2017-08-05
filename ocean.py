@@ -49,12 +49,17 @@ def test(coverage=False):
 
 
 @manager.command
-def initdb():
-    """"""
+def deploy():
+    from flask_migrate import upgrade
+
+    upgrade()
+
     Role.insert_roles()
     User.generate_fake()
     Post.generate_fake()
     Comment.generate_fake()
+
+    User.add_self_follows()
 
 
 if __name__ == '__main__':

@@ -30,6 +30,10 @@ class Config:
     OCEAN_POSTS_PER_PAGE = 20
     OCEAN_COMMENTS_PER_PAGE = 20
 
+    # 缓慢查询配置
+    OCEAN_SLOW_DB_QUERY_TIME = 0.5
+    SQLALCHEMY_RECORD_QUERIES = True
+
 
 class DevelopmentConfig(Config):
     DEBUG = True
