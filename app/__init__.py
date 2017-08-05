@@ -23,6 +23,7 @@ def create_app(config_name):
 
     # 导入配置
     app.config.from_object(config[config_name])
+    config[config_name].init_app(app)
 
     # 初始化插件
     bootstrap.init_app(app)
