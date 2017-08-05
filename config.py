@@ -35,6 +35,9 @@ class Config:
     OCEAN_SLOW_DB_QUERY_TIME = 0.5
     SQLALCHEMY_RECORD_QUERIES = True
 
+    # 是否启用SSL
+    SSL_DISABLE = True
+
     @classmethod
     def init_app(cls, app):
         pass
@@ -77,10 +80,32 @@ class ProductionConfig(Config):
         app.logger.addHandler(mail_handler)
 
 
+class HerokuConfig(ProductionConfig):
+    # 是否启用SSL
+    SSL_DISABLE = bool(os.environ.get('SSL_DISABLE'))
+
+    @classmethod
+    def init_app(cls, app):
+        ProductionConfig.init_app(app)
+
+        # 输出到stderr
+        import logging
+        from logging import StreamHandler
+        file_handler = StreamHandler()
+        file_handler.setLevel(logging.WARNING)
+        app.logger.addHandler(file_handler)
+
+        # 处理代理服务器首部以支持proxy
+        from werkzeug.contrib.fixers import ProxyFix
+        app.wsgi_app = ProxyFix(app.wsgi_app)
+
+
 config = {
     'development': DevelopmentConfig,
     'testing': TestingConfig,
     'production': ProductionConfig,
+
+    'heroku': HerokuConfig,
 
     'default': DevelopmentConfig
 }
