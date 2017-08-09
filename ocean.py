@@ -14,7 +14,7 @@ if os.path.exists('environment_var.env'):
         var = line.strip().split('=')
         if len(var) == 2:
             os.environ[var[0]] = var[1]
-            print('Imported {var_name} as {var_value}'.format(var_name=var[0], var_value=var[1]))
+    print('Imported env var')
 
 
 from app import create_app, db
