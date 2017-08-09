@@ -37,6 +37,9 @@ class Config:
     # 是否启用SSL
     SSL_DISABLE = True
 
+    # celery代理
+    CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
+
     @classmethod
     def init_app(cls, app):
         pass

@@ -1,5 +1,6 @@
 from flask import Flask
-from config import config
+from celery import Celery
+from config import config, Config
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 from flask_moment import Moment
@@ -9,6 +10,7 @@ from flask_uploads import UploadSet, configure_uploads, IMAGES
 
 
 bootstrap = Bootstrap()
+celery = Celery(__name__, broker=Config.CELERY_BROKER_URL)
 moment = Moment()
 mail = Mail()
 db = SQLAlchemy()
@@ -27,6 +29,7 @@ def create_app(config_name):
 
     # 初始化插件
     bootstrap.init_app(app)
+    celery.conf.update(app.config)
     moment.init_app(app)
     mail.init_app(app)
     db.init_app(app)
