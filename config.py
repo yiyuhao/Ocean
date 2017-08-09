@@ -53,6 +53,7 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.getenv('TEST_DATABASE_URL')
+    WTF_CSRF_ENABLED = False
 
 
 class ProductionConfig(Config):
@@ -100,6 +101,20 @@ class HerokuConfig(ProductionConfig):
         # 处理代理服务器首部以支持proxy
         from werkzeug.contrib.fixers import ProxyFix
         app.wsgi_app = ProxyFix(app.wsgi_app)
+
+
+# 将日志发给daemon:
+class UnixConfig(ProductionConfig):
+    @classmethod
+    def init_app(cls, app):
+        ProductionConfig.init_app(app)
+
+        # log to syslog
+        import logging
+        from logging.handlers import SysLogHandler
+        syslog_handler = SysLogHandler()
+        syslog_handler.setLevel(logging.WARNING)
+        app.logger.addHandler(syslog_handler)
 
 
 config = {

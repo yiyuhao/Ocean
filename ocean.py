@@ -11,6 +11,13 @@ if os.environ.get('OCEAN_COVERAGE'):
     COV = coverage.coverage(branch=True, include='app/*')
     COV.start()
 
+# 从.env文件中导入环境变量
+if os.path.exists('.env'):
+    print('Importing environment from .env...')
+    for line in open('.env'):
+        var = line.strip().split('=')
+        if len(var) == 2:
+            os.environ[var[0]] = var[1]
 
 app = create_app(os.getenv('OCEAN_ENVIRONMENT') or 'default')
 
@@ -51,13 +58,11 @@ def test(coverage=False):
 @manager.command
 def deploy():
     from flask_migrate import upgrade
+    from app.models import Role, User
 
     upgrade()
 
     Role.insert_roles()
-    User.generate_fake()
-    Post.generate_fake()
-    Comment.generate_fake()
 
     User.add_self_follows()
 
