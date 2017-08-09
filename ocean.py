@@ -1,7 +1,3 @@
-from app import create_app, db
-from app.models import User, Role, Post, Comment
-from flask_script import Manager, Shell
-from flask_migrate import Migrate, MigrateCommand
 import os
 
 
@@ -19,6 +15,13 @@ if os.path.exists('environment_var.env'):
         if len(var) == 2:
             os.environ[var[0]] = var[1]
             print('Imported {var_name} as {var_value}'.format(var_name=var[0], var_value=var[1]))
+
+
+from app import create_app, db
+from app.models import User, Role, Post, Comment
+from flask_script import Manager, Shell
+from flask_migrate import Migrate, MigrateCommand
+
 
 app = create_app(os.getenv('OCEAN_ENVIRONMENT') or 'default')
 
