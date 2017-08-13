@@ -40,6 +40,9 @@ class Config:
     # celery代理
     CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 
+    # server name
+    SERVER_NAME = os.getenv('SERVER_NAME')
+
     @classmethod
     def init_app(cls, app):
         pass
