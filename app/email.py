@@ -4,12 +4,16 @@ from flask_mail import Message
 from . import celery, mail
 
 
-@celery.task
 def send_async_email(app, msg):
     # flask-mail的send()使用current_app，所以在不同线程执行mail.send()时，必须人工创建上下文
     # 使用celery可不用创建上下文
     with app.app_context():
         mail.send(msg)
+
+
+@celery.task
+def celery_send_mail(msg):
+    mail.send(msg)
 
 
 def send_email(to, subject, template, **kwargs):
@@ -21,7 +25,7 @@ def send_email(to, subject, template, **kwargs):
                   sender=app.config['MAIL_SENDER'])
     # 生产环境使用celery
     if app.config['CELERY_BROKER_URL']:
-        send_async_email.delay(app, msg)
+        celery_send_mail.delay(app, msg)
     else:
         th = Thread(target=send_async_email, name='send email', args=[app, msg])
         th.start()
