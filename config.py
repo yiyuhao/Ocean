@@ -82,6 +82,10 @@ class ProductionConfig(Config):
         mail_handler.setLevel(logging.ERROR)
         app.logger.addHandler(mail_handler)
 
+        # 处理代理服务器首部以支持proxy
+        from werkzeug.contrib.fixers import ProxyFix
+        app.wsgi_app = ProxyFix(app.wsgi_app)
+
 
 class HerokuConfig(ProductionConfig):
     # 是否启用SSL
