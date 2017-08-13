@@ -25,7 +25,7 @@ def send_email(to, subject, template, **kwargs):
                   sender=app.config['MAIL_SENDER'])
     # 生产环境使用celery
     if app.config['CELERY_BROKER_URL']:
-        celery_send_mail.delay(app, msg)
+        celery_send_mail.delay(msg)
     else:
         th = Thread(target=send_async_email, name='send email', args=[app, msg])
         th.start()
