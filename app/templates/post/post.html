@@ -83,9 +83,9 @@
         </ul>
 
         {# 评论栏及分页 #}
-        <ul class="posts box-shadow">
+        <ul class="posts box-shadow" id="comments">
             {% if not current_user.is_anonymous %}
-                <li class="comments" id="comments">
+                <li class="comments">
                     {{ wtf.quick_form(form) }}
                 </li>
             {% endif %}

@@ -180,6 +180,12 @@ class User(UserMixin, db.Model):
         self.user_avatar_hash = filename_hash
         db.session.add(self)
 
+    # 根据用户名修改默认头像
+    @staticmethod
+    def on_changed_user_name(target, value, oldvalue, initiator):
+        if len(target.user_avatar_hash) < 10:
+            target.user_avatar_hash = '{initials}.jpg'.format(initials=value[0].upper())
+
     # 注册确认token 及重置密码token
     def generate_confirmation_token(self, expiration=3600):
         s = Serializer(current_app.config['SECRET_KEY'], expires_in=expiration)
@@ -328,6 +334,9 @@ class User(UserMixin, db.Model):
             'post_count': self.posts.count()
         }
         return json_user
+
+
+db.event.listen(User.user_name, 'set', User.on_changed_user_name)
 
 
 # 游客权限
