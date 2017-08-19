@@ -130,9 +130,10 @@
             else if ((document.body) && (document.body.clientHeight))
                 winHeight = document.body.clientHeight;
             // 响应式
-            if (winHeight > 600)
-                var ckeditor_content_height = winHeight * 0.55;
-            else
+            if (winHeight > 600) {
+                var modalHeight = 200;
+                var ckeditor_content_height = winHeight * 0.55 - modalHeight;
+            } else
                 ckeditor_content_height = winHeight * 0.35;
             CKEDITOR.on('instanceReady', function (e) {
                 var ckeditor_content = document.getElementById('cke_1_contents');
