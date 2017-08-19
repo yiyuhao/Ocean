@@ -183,7 +183,10 @@ class User(UserMixin, db.Model):
     # 根据用户名修改默认头像
     @staticmethod
     def on_changed_user_name(target, value, oldvalue, initiator):
-        if len(target.user_avatar_hash) < 10:
+        # 初始化User对象时会先触发on_change事件，此时user_avatar_hash还为None
+        # 因此判断avatar_hash is None或用户之前是默认头像时，帮助用户更新默认头像
+        user_avatar_hash = 'A.jpg' if target.user_avatar_hash is None else target.user_avatar_hash
+        if len(user_avatar_hash) < 10:
             target.user_avatar_hash = '{initials}.jpg'.format(initials=value[0].upper())
 
     # 注册确认token 及重置密码token
