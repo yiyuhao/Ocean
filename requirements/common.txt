@@ -34,7 +34,7 @@ MarkupSafe==1.0
 olefile==0.44
 Pillow==4.2.0
 psycopg2==2.7.3
-Pygments==2.2.0
+Pygments==2.7.4
 PyMySQL==0.7.11
 python-dateutil==2.6.0
 python-editor==1.0.3
